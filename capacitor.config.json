@@ -1,0 +1,19 @@
+{
+  "appId": "com.revelacode.app",
+  "appName": "RevelaCode",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 1800,
+      "launchFadeOutDuration": 250,
+      "backgroundColor": "#08111F",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_INSIDE",
+      "showSpinner": false
+    }
+  }
+}
