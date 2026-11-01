@@ -54,10 +54,6 @@ jobs:
       ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || '3' }}
       VITE_ADMOB_ANDROID_APP_ID: ${{ secrets.VITE_ADMOB_ANDROID_APP_ID }}
       VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID: ${{ secrets.VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID }}
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     steps:
       - name: Checkout Android source
         uses: actions/checkout@v4
@@ -77,12 +73,10 @@ jobs:
           node-version: "22"
 
       - name: Set up Java for Android Gradle
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
-          cache: gradle
-          cache-dependency-path: android/**/*.gradle*
 
       - name: Install and build the web application
         working-directory: frontend
@@ -147,10 +141,26 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Prepare release signing when secrets are configured
-        id: signing
-        if: ${{ inputs.build_type == 'release' && env.ANDROID_KEYSTORE_BASE64 != '' && env.ANDROID_KEYSTORE_PASSWORD != '' && env.ANDROID_KEY_ALIAS != '' && env.ANDROID_KEY_PASSWORD != '' }}
+      - name: Check whether release signing is configured
+        id: signing_config
+        if: ${{ inputs.build_type == 'release' }}
         env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure release signing
+        id: signing
+        if: ${{ inputs.build_type == 'release' && steps.signing_config.outputs.configured == 'true' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/revelacode-release.keystore
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
