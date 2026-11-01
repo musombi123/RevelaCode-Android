@@ -1,0 +1,33 @@
+# Node dependencies and generated web assets
+node_modules/
+www/
+dist/
+brand-assets/
+.env
+.env.*
+!.env.example
+
+# Generated Capacitor web payload (rebuilt from the frontend on each run)
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/assets/cordova.js
+
+# Android local/build output
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/**/build/
+android/capacitor-cordova-android-plugins/build/
+.gradle/
+*.apk
+*.aab
+*.apks
+android-launch-logcat.txt
+
+# Signing material
+*.jks
+*.keystore
+*.keystore.properties
+android/revelacode-release.keystore
