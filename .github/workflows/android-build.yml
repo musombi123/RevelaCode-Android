@@ -42,8 +42,10 @@ permissions:
   contents: write
 
 concurrency:
-  group: revelacode-android-${{ github.ref }}
-  cancel-in-progress: false
+  # Keep debug verification independent from signed releases. New pushes replace
+  # stale debug runs instead of leaving the latest Android UI build queued.
+  group: revelacode-android-${{ github.ref }}-${{ inputs.build_type || 'debug' }}
+  cancel-in-progress: true
 
 jobs:
   android:
