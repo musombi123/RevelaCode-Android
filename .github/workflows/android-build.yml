@@ -205,6 +205,26 @@ jobs:
         run: |
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
           test -s "$ANDROID_KEYSTORE_PATH"
+
+          # GitHub secrets can accidentally contain copied leading/trailing whitespace.
+          ANDROID_KEY_ALIAS="$(printf '%s' "$ANDROID_KEY_ALIAS" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          if [ -z "$ANDROID_KEY_ALIAS" ]; then
+            echo "::error::ANDROID_KEY_ALIAS is empty after trimming whitespace."
+            exit 1
+          fi
+
+          # Validate the store password and key alias before starting the longer Gradle build.
+          if ! keytool -list -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+            echo "::error::The release keystore could not be opened. Check ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD."
+            exit 1
+          fi
+          if ! keytool -list -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null 2>&1; then
+            echo "::error::ANDROID_KEY_ALIAS does not match an alias in the supplied keystore after whitespace trimming. Check the secret value."
+            exit 1
+          fi
+
+          # Persist the normalized alias for the following Gradle step.
+          printf 'ANDROID_KEY_ALIAS=%s\n' "$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
           node scripts/configure-android-release-signing.mjs
           echo "release_signed=true" >> "$GITHUB_OUTPUT"
 
@@ -213,7 +233,6 @@ jobs:
         env:
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/revelacode-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: cd android && ./gradlew --no-daemon assembleRelease bundleRelease
 
