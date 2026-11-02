@@ -85,6 +85,15 @@ jobs:
           npm run build
           test -s dist/index.html
 
+      - name: Verify MissionPulse responsive workspace is included
+        working-directory: frontend
+        run: |
+          if ! grep -R -q --include='*.js' 'missionpulse-workspace' dist/assets; then
+            echo "MissionPulse responsive workspace was not found in the production bundle."
+            exit 1
+          fi
+          echo "MissionPulse responsive workspace is present in the Android web bundle."
+
       - name: Stage the production web bundle and brand asset
         run: |
           rm -rf www brand-assets
