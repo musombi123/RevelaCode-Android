@@ -75,7 +75,9 @@ Configure these only in the Android repository's GitHub Actions secrets:
 | Secret | Purpose |
 |---|---|
 | `VITE_ADMOB_ANDROID_APP_ID` | Production AdMob Android application ID |
-| `VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID` | Production Community native ad unit ID |
+| `VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID` | Community Feed native ad unit ID |
+| `VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID` | Community Home native ad unit ID |
+| `VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID` | Faith Overview native ad unit ID |
 | `ANDROID_KEYSTORE_BASE64` | Base64-encoded release keystore |
 | `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
 | `ANDROID_KEY_ALIAS` | Release key alias |
