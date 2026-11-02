@@ -141,6 +141,20 @@ jobs:
       - name: Build installable debug APK
         run: cd android && ./gradlew --no-daemon assembleDebug
 
+      - name: Enable KVM access for Android emulator
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+              echo "KVM is accessible to the emulator runner."
+            else
+              echo "::warning::KVM exists but is not accessible; emulator may use slow software CPU emulation."
+            fi
+          else
+            echo "::warning::KVM is unavailable on this runner; emulator will use software CPU emulation."
+          fi
+
       - name: Verify and report debug APK size
         run: |
           test -s android/app/build/outputs/apk/debug/app-debug.apk
@@ -237,26 +251,82 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
-          # Restore the emulator configuration that passed smoke testing in Android CI run #18.
+          # The runner uses KVM when available; SwiftShader keeps graphics headless.
           emulator-boot-timeout: 900
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          # SwiftShader software renderer was verified successfully on this API 36 runner.
           emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
+          # Avoid settings commands while ADB is reconnecting after a slow cold boot.
+          disable-animations: false
           script: |
-            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
-            adb logcat -c
-            adb shell monkey -p com.revelacode.app 1
-            sleep 15
-            adb logcat -d -v threadtime > android-launch-logcat.txt
-            adb shell pidof com.revelacode.app
+            set -euo pipefail
+
+            capture_logcat() {
+              adb -s emulator-5554 logcat -d -v threadtime > android-launch-logcat.txt 2>/dev/null || true
+            }
+            trap capture_logcat EXIT
+
+            echo "Waiting for the emulator transport to become online..."
+            adb start-server >/dev/null 2>&1 || true
+            adb devices -l
+            for attempt in $(seq 1 120); do
+              device_state="$(adb devices | awk '$1 == "emulator-5554" { print $2 }')"
+              if [ "$device_state" = "device" ]; then
+                break
+              fi
+              if [ "$device_state" = "offline" ]; then
+                adb reconnect offline >/dev/null 2>&1 || true
+              fi
+              sleep 5
+            done
+
+            device_state="$(adb devices | awk '$1 == "emulator-5554" { print $2 }')"
+            if [ "$device_state" != "device" ]; then
+              echo "Emulator ADB transport did not become online (state: ${device_state:-missing})."
+              adb devices -l || true
+              exit 1
+            fi
+
+            echo "Waiting for Android framework boot completion..."
+            boot_complete=""
+            for attempt in $(seq 1 120); do
+              boot_complete="$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r' || true)"
+              if [ "$boot_complete" = "1" ]; then
+                break
+              fi
+              sleep 5
+            done
+            if [ "$boot_complete" != "1" ]; then
+              echo "Android framework did not report sys.boot_completed=1."
+              exit 1
+            fi
+
+            adb -s emulator-5554 install --no-streaming -r android/app/build/outputs/apk/debug/app-debug.apk
+            adb -s emulator-5554 shell pm path com.revelacode.app
+            adb -s emulator-5554 logcat -c
+            adb -s emulator-5554 shell monkey -p com.revelacode.app 1
+            sleep 20
+
+            app_pid="$(adb -s emulator-5554 shell pidof com.revelacode.app | tr -d '\\r' || true)"
+            if [ -z "$app_pid" ]; then
+              echo "RevelaCode did not retain a running process after launch."
+              capture_logcat
+              grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com.revelacode.app' android-launch-logcat.txt | tail -n 100 || true
+              exit 1
+            fi
+
+            echo "RevelaCode launched successfully. PID: $app_pid"
 
       - name: Capture emulator boot diagnostics on smoke-test failure
         if: failure()
         continue-on-error: true
         run: |
+          # Preserve guest Logcat captured by the emulator step's EXIT trap.
+          if [ -s android-launch-logcat.txt ]; then
+            echo "Preserving Logcat captured before the emulator was terminated."
+            exit 0
+          fi
           {
             echo "=== adb devices ==="
             adb devices -l || true
@@ -267,7 +337,7 @@ jobs:
             echo "=== guest logcat ==="
             timeout 20s adb -s emulator-5554 logcat -d -v threadtime || true
             echo "=== host emulator logs ==="
-            find "$HOME/.android" -type f -name '*.log' -print -exec tail -n 300 {} \; 2>/dev/null || true
+            find "$HOME/.android" -type f -name '*.log' -print -exec tail -n 300 {} \\; 2>/dev/null || true
           } > android-launch-logcat.txt
 
       - name: Upload Android launch diagnostics
