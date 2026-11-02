@@ -4,7 +4,11 @@ import { resolve } from "node:path";
 const ROOT = process.cwd();
 const TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713";
 const APP_ID_KEY = "VITE_ADMOB_ANDROID_APP_ID";
-const UNIT_ID_KEY = "VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID";
+const UNIT_ID_KEYS = [
+  "VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID",
+  "VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID",
+  "VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID",
+];
 
 function parseDotEnv(text, key) {
   for (const line of text.split(/\r?\n/)) {
@@ -49,23 +53,31 @@ function escapeXml(value) {
 
 async function main() {
   const configuredAppId = await readConfigValue(APP_ID_KEY);
-  const configuredUnitId = await readConfigValue(UNIT_ID_KEY);
-  const useProductionIds = Boolean(configuredAppId && configuredUnitId);
+  const configuredUnits = await Promise.all(
+    UNIT_ID_KEYS.map(async (key) => ({
+      key,
+      value: await readConfigValue(key),
+    })),
+  );
+  const hasConfiguredUnit = configuredUnits.some((item) => Boolean(item.value));
+  const useProductionIds = Boolean(configuredAppId && hasConfiguredUnit);
   const appId = useProductionIds ? configuredAppId : TEST_APP_ID;
 
-  if (!/^ca-app-pub-\d+~\d+$/.test(appId)) {
+  if (
+    configuredAppId &&
+    !/^ca-app-pub-\\d+~\\d+$/.test(configuredAppId)
+  ) {
     throw new Error(
       `${APP_ID_KEY} must be a valid AdMob application ID (format ca-app-pub-...~...).`,
     );
   }
 
-  if (
-    useProductionIds &&
-    !/^ca-app-pub-\d+\/\d+$/.test(configuredUnitId)
-  ) {
-    throw new Error(
-      `${UNIT_ID_KEY} must be a valid AdMob ad unit ID (format ca-app-pub-.../...).`,
-    );
+  for (const item of configuredUnits) {
+    if (item.value && !/^ca-app-pub-\\d+\\/\\d+$/.test(item.value)) {
+      throw new Error(
+        `${item.key} must be a valid AdMob ad unit ID (format ca-app-pub-.../...).`,
+      );
+    }
   }
 
   const manifestPath = resolve(
@@ -128,8 +140,8 @@ async function main() {
 
   console.log(
     useProductionIds
-      ? "AdMob Android manifest configured with your AdMob application ID."
-      : "AdMob Android manifest configured with Google's test application ID. No revenue ads will be requested until both production IDs are configured.",
+      ? `AdMob Android manifest configured with your production App ID and ${configuredUnits.filter((item) => item.value).length} production native ad unit ID(s). Any unconfigured placement remains in test mode.`
+      : "AdMob Android manifest configured with Google's test application ID. Configure the production App ID and at least one native ad unit to enable production inventory.",
   );
 }
 
