@@ -80,6 +80,8 @@ jobs:
 
       - name: Install and build the web application
         working-directory: frontend
+        env:
+          VITE_ANDROID_APP: "true"
         run: |
           npm ci
           npm run build
@@ -93,6 +95,11 @@ jobs:
             exit 1
           fi
           echo "MissionPulse responsive workspace is present in the Android web bundle."
+          if ! grep -R -q --include='*.js' 'rc-android-home' dist/assets; then
+            echo "Compact Android home layout was not found in the production bundle."
+            exit 1
+          fi
+          echo "Compact Android home layout is present in the production bundle."
 
       - name: Stage the production web bundle and brand asset
         run: |
