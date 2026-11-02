@@ -259,66 +259,8 @@ jobs:
           emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
           # Avoid settings commands while ADB is reconnecting after a slow cold boot.
           disable-animations: false
-          script: |
-            # The emulator runner executes this script with /usr/bin/sh, not Bash.
-            # Keep the safety flags POSIX-compatible so launch verification actually runs.
-            set -eu
-
-            capture_logcat() {
-              adb -s emulator-5554 logcat -d -v threadtime > android-launch-logcat.txt 2>/dev/null || true
-            }
-            trap capture_logcat EXIT
-
-            echo "Waiting for the emulator transport to become online..."
-            adb start-server >/dev/null 2>&1 || true
-            adb devices -l
-            for attempt in $(seq 1 120); do
-              device_state="$(adb devices | awk '$1 == "emulator-5554" { print $2 }')"
-              if [ "$device_state" = "device" ]; then
-                break
-              fi
-              if [ "$device_state" = "offline" ]; then
-                adb reconnect offline >/dev/null 2>&1 || true
-              fi
-              sleep 5
-            done
-
-            device_state="$(adb devices | awk '$1 == "emulator-5554" { print $2 }')"
-            if [ "$device_state" != "device" ]; then
-              echo "Emulator ADB transport did not become online (state: ${device_state:-missing})."
-              adb devices -l || true
-              exit 1
-            fi
-
-            echo "Waiting for Android framework boot completion..."
-            boot_complete=""
-            for attempt in $(seq 1 120); do
-              boot_complete="$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
-              if [ "$boot_complete" = "1" ]; then
-                break
-              fi
-              sleep 5
-            done
-            if [ "$boot_complete" != "1" ]; then
-              echo "Android framework did not report sys.boot_completed=1."
-              exit 1
-            fi
-
-            adb -s emulator-5554 install --no-streaming -r android/app/build/outputs/apk/debug/app-debug.apk
-            adb -s emulator-5554 shell pm path com.revelacode.app
-            adb -s emulator-5554 logcat -c
-            adb -s emulator-5554 shell monkey -p com.revelacode.app 1
-            sleep 20
-
-            app_pid="$(adb -s emulator-5554 shell pidof com.revelacode.app | tr -d '\r' || true)"
-            if [ -z "$app_pid" ]; then
-              echo "RevelaCode did not retain a running process after launch."
-              capture_logcat
-              grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com.revelacode.app' android-launch-logcat.txt | tail -n 100 || true
-              exit 1
-            fi
-
-            echo "RevelaCode launched successfully. PID: $app_pid"
+          # The action executes each script line in a separate shell; invoke one complete Bash script.
+          script: bash .github/scripts/smoke-test-android.sh
 
       - name: Capture emulator boot diagnostics on smoke-test failure
         if: failure()
