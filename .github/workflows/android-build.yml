@@ -226,10 +226,13 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
-          emulator-boot-timeout: 900000
+          # The runner expects this value in seconds: 900 = 15 minutes.
+          emulator-boot-timeout: 900
           target: google_apis
           arch: x86_64
           profile: pixel_2
+          # Use the current SwiftShader software renderer instead of deprecated swiftshader_indirect.
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
