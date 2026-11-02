@@ -11,6 +11,9 @@ const requiredPermissions = [
   "android.permission.CAMERA",
   "android.permission.RECORD_AUDIO",
   "android.permission.MODIFY_AUDIO_SETTINGS",
+  "android.permission.INTERNET",
+  "android.permission.ACCESS_NETWORK_STATE",
+  "android.permission.ACCESS_WIFI_STATE",
   "android.permission.ACCESS_COARSE_LOCATION",
   "android.permission.ACCESS_FINE_LOCATION",
   "android.permission.POST_NOTIFICATIONS",
@@ -208,5 +211,5 @@ if (!activity.includes("registerPlugin(RevelaPermissionsPlugin.class)")) {
 }
 await writeFile(activityPath, activity, "utf8");
 
-console.log("Configured Android camera, location and microphone permissions.");
+console.log("Configured Android camera, location, microphone, speaker audio settings, internet and network-state permissions.");
 console.log("Files are accessed through Android's system picker; no unrestricted storage permission was added.");
