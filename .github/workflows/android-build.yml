@@ -237,13 +237,13 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
-          # The runner expects this value in seconds: 900 = 15 minutes.
-          emulator-boot-timeout: 900
+          # Fail clearly if the guest OS cannot finish booting; do not spend another 15+ minutes polling.
+          emulator-boot-timeout: 600
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          # Use the current SwiftShader software renderer instead of deprecated swiftshader_indirect.
-          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
+          # Use the emulator-selected software renderer and disable Vulkan for this headless CI smoke test.
+          emulator-options: -no-window -gpu software -feature -Vulkan -no-snapshot -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
@@ -252,6 +252,23 @@ jobs:
             sleep 15
             adb logcat -d -v threadtime > android-launch-logcat.txt
             adb shell pidof com.revelacode.app
+
+      - name: Capture emulator boot diagnostics on smoke-test failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          {
+            echo "=== adb devices ==="
+            adb devices -l || true
+            echo "=== emulator process ==="
+            ps auxww | grep -E '[e]mulator|[q]emu' || true
+            echo "=== Android boot property ==="
+            timeout 15s adb -s emulator-5554 shell getprop sys.boot_completed || true
+            echo "=== guest logcat ==="
+            timeout 20s adb -s emulator-5554 logcat -d -v threadtime || true
+            echo "=== host emulator logs ==="
+            find "$HOME/.android" -type f -name '*.log' -print -exec tail -n 300 {} \; 2>/dev/null || true
+          } > android-launch-logcat.txt
 
       - name: Upload Android launch diagnostics
         if: always()
