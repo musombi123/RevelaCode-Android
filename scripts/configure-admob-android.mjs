@@ -65,7 +65,7 @@ async function main() {
 
   if (
     configuredAppId &&
-    !/^ca-app-pub-\\d+~\\d+$/.test(configuredAppId)
+    !/^ca-app-pub-\d+~\d+$/.test(configuredAppId)
   ) {
     throw new Error(
       `${APP_ID_KEY} must be a valid AdMob application ID (format ca-app-pub-...~...).`,
@@ -73,7 +73,7 @@ async function main() {
   }
 
   for (const item of configuredUnits) {
-    if (item.value && !/^ca-app-pub-\\d+\\/\\d+$/.test(item.value)) {
+    if (item.value && !/^ca-app-pub-\d+\/\d+$/.test(item.value)) {
       throw new Error(
         `${item.key} must be a valid AdMob ad unit ID (format ca-app-pub-.../...).`,
       );
