@@ -43,7 +43,7 @@ fi
 echo "Waiting for Android framework boot completion..."
 boot_complete=""
 for attempt in $(seq 1 120); do
-  boot_complete="$(adb -s "$SERIAL" shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r' || true)"
+  boot_complete="$(adb -s "$SERIAL" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
   [[ "$boot_complete" == "1" ]] && break
   sleep 5
 done
@@ -62,7 +62,7 @@ echo "Launching RevelaCode..."
 adb -s "$SERIAL" shell monkey -p "$PACKAGE" 1
 sleep 20
 
-app_pid="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\\r' || true)"
+app_pid="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' || true)"
 if [[ -z "$app_pid" ]]; then
   echo "RevelaCode did not retain a running process after launch."
   capture_logcat
