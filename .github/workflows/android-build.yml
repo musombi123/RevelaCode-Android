@@ -291,7 +291,7 @@ jobs:
             echo "Waiting for Android framework boot completion..."
             boot_complete=""
             for attempt in $(seq 1 120); do
-              boot_complete="$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\\r' || true)"
+              boot_complete="$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
               if [ "$boot_complete" = "1" ]; then
                 break
               fi
@@ -308,7 +308,7 @@ jobs:
             adb -s emulator-5554 shell monkey -p com.revelacode.app 1
             sleep 20
 
-            app_pid="$(adb -s emulator-5554 shell pidof com.revelacode.app | tr -d '\\r' || true)"
+            app_pid="$(adb -s emulator-5554 shell pidof com.revelacode.app | tr -d '\r' || true)"
             if [ -z "$app_pid" ]; then
               echo "RevelaCode did not retain a running process after launch."
               capture_logcat
@@ -337,7 +337,7 @@ jobs:
             echo "=== guest logcat ==="
             timeout 20s adb -s emulator-5554 logcat -d -v threadtime || true
             echo "=== host emulator logs ==="
-            find "$HOME/.android" -type f -name '*.log' -print -exec tail -n 300 {} \\; 2>/dev/null || true
+            find "$HOME/.android" -type f -name '*.log' -print -exec tail -n 300 {} \; 2>/dev/null || true
           } > android-launch-logcat.txt
 
       - name: Upload Android launch diagnostics
