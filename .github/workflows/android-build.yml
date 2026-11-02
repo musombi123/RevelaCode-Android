@@ -138,6 +138,7 @@ jobs:
 
       - name: Persist the generated native project and dependency lock
         uses: stefanzweifel/git-auto-commit-action@v5
+        continue-on-error: true
         with:
           commit_message: "chore(android): persist Capacitor native project [skip ci]"
           file_pattern: android/ package-lock.json
@@ -183,6 +184,18 @@ jobs:
         if: ${{ steps.signing.outputs.release_signed == 'true' }}
         run: cd android && ./gradlew --no-daemon assembleRelease bundleRelease
 
+      - name: Verify release APK signature and certificate identity
+        if: ${{ steps.signing.outputs.release_signed == 'true' }}
+        shell: bash
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          CERT_OUTPUT="$("$APKSIGNER" verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk)"
+          printf '%s\\n' "$CERT_OUTPUT"
+          EXPECTED_SHA256="dc0528005931c618e70bb70fe2d4427e242922b47426015c1654afe4e950e540"
+          printf '%s\\n' "$CERT_OUTPUT" | grep -Eiq "Signer #1 certificate SHA-256 digest: $EXPECTED_SHA256"
+          echo "Verified APK signature matches the permanent RevelaCode production certificate."
+
       - name: Upload signed release APK
         if: ${{ steps.signing.outputs.release_signed == 'true' }}
         uses: actions/upload-artifact@v4
@@ -201,9 +214,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Explain unsigned release fallback
+      - name: Fail release when signing secrets are incomplete
         if: ${{ inputs.build_type == 'release' && steps.signing.outputs.release_signed != 'true' }}
-        run: echo "Release signing secrets are incomplete. A debug APK was built; no unsigned release was published."
+        run: |
+          echo "Release build requested, but one or more Android signing secrets are missing or empty."
+          echo "Required: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD."
+          exit 1
 
       - name: Smoke-test APK launch on Android emulator
         uses: reactivecircus/android-emulator-runner@v2
