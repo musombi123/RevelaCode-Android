@@ -237,13 +237,13 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
-          # Fail clearly if the guest OS cannot finish booting; do not spend another 15+ minutes polling.
-          emulator-boot-timeout: 600
+          # Restore the emulator configuration that passed smoke testing in Android CI run #18.
+          emulator-boot-timeout: 900
           target: google_apis
           arch: x86_64
           profile: pixel_2
-          # Use the emulator-selected software renderer and disable Vulkan for this headless CI smoke test.
-          emulator-options: -no-window -gpu software -feature -Vulkan -no-snapshot -noaudio -no-boot-anim -camera-back none
+          # SwiftShader software renderer was verified successfully on this API 36 runner.
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
             adb install -r android/app/build/outputs/apk/debug/app-debug.apk
