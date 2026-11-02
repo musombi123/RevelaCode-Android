@@ -260,7 +260,9 @@ jobs:
           # Avoid settings commands while ADB is reconnecting after a slow cold boot.
           disable-animations: false
           script: |
-            set -euo pipefail
+            # The emulator runner executes this script with /usr/bin/sh, not Bash.
+            # Keep the safety flags POSIX-compatible so launch verification actually runs.
+            set -eu
 
             capture_logcat() {
               adb -s emulator-5554 logcat -d -v threadtime > android-launch-logcat.txt 2>/dev/null || true
