@@ -151,6 +151,23 @@ jobs:
           done
           echo "Verified: bilingual guided Demo Session, five-step Elimu chapter, simulated RevelaAI chat, mock wallet, hub anchors and locale-safe narration."
 
+      - name: Verify premium plans and M-Pesa checkout are included
+        working-directory: frontend
+        run: |
+          for required_marker in \\
+            "Premium plans" \\
+            "revelacode:premium-open" \\
+            "premium-mpesa-phone" \\
+            "/api/revenue/checkout" \\
+            "Check your phone and enter your M-Pesa PIN" \\
+            "Start using Premium"; do
+            if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
+              echo "Missing premium purchase UI marker: $required_marker"
+              exit 1
+            fi
+          done
+          echo "Premium plans launcher, M-Pesa checkout form, backend route and confirmation UI are bundled."
+
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
         run: |
