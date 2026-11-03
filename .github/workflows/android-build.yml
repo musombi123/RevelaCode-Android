@@ -55,6 +55,11 @@ jobs:
     env:
       ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || '2.1.0' }}
       ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || '3' }}
+      # Native bundle must always target the deployed platform APIs; never leave production Vite URLs blank.
+      VITE_API_URL: "https://revelacode-backend.onrender.com"
+      VITE_API_BASE_URL: "https://revelacode-backend.onrender.com"
+      VITE_BACKEND_URL: "https://revelacode-backend.onrender.com"
+      VITE_REVELAAI_API_URL: "https://revelaai.onrender.com"
       VITE_ADMOB_ANDROID_APP_ID: ${{ secrets.VITE_ADMOB_ANDROID_APP_ID }}
       VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID: ${{ secrets.VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID }}
       VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID: ${{ secrets.VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID }}
@@ -87,6 +92,10 @@ jobs:
         working-directory: frontend
         env:
           VITE_ANDROID_APP: "true"
+          VITE_API_URL: "https://revelacode-backend.onrender.com"
+          VITE_API_BASE_URL: "https://revelacode-backend.onrender.com"
+          VITE_BACKEND_URL: "https://revelacode-backend.onrender.com"
+          VITE_REVELAAI_API_URL: "https://revelaai.onrender.com"
         run: |
           npm ci
           npm run build
