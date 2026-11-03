@@ -143,7 +143,7 @@ jobs:
               exit 1
             fi
           done
-          echo "The bilingual guided Demo Session and hub anchors are present in the Android bundle."
+          echo "The current frontend revision contains the bilingual guided Demo Session and all required hub anchors."
 
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
