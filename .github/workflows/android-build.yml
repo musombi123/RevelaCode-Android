@@ -70,6 +70,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      # For push-triggered builds, package the latest verified frontend main.
+      # Repository-dispatch and manual runs can still pin an exact frontend ref.
       - name: Checkout the selected web application revision
         uses: actions/checkout@v4
         with:
