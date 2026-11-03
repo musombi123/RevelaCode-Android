@@ -114,6 +114,17 @@ jobs:
           fi
           echo "Shamba mobile workspace and native Android Back listener are included."
 
+      - name: Verify Biashara Android overview and navigation are included
+        working-directory: frontend
+        run: |
+          for required_label in "Biashara Hub" "Run your business" "Sync Centre" "Sales entry" "Biashara mobile navigation"; do
+            if ! grep -R -F -q --include='*.js' "$required_label" dist/assets; then
+              echo "Missing Biashara Android UI element: $required_label"
+              exit 1
+            fi
+          done
+          echo "Biashara Android overview modules and mobile navigation are present."
+
       - name: Verify MissionPulse responsive workspace is included
         working-directory: frontend
         run: |
