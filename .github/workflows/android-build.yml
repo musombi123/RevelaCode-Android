@@ -318,3 +318,33 @@ jobs:
           path: android-launch-logcat.txt
           if-no-files-found: ignore
           retention-days: 7
+
+      # Publish the verified, signed APK as a public release asset. The
+      # website links to the stable latest-release download URL, not a
+      # short-lived Actions artifact.
+      - name: Stage public Android APK
+        if: ${{ success() && env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed == 'true' }}
+        run: |
+          install -D android/app/build/outputs/apk/release/app-release.apk RevelaCode-Android.apk
+          test -s RevelaCode-Android.apk
+          sha256sum RevelaCode-Android.apk
+
+      - name: Publish public Android release
+        if: ${{ success() && env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.ANDROID_VERSION_NAME }}
+          name: RevelaCode Android ${{ env.ANDROID_VERSION_NAME }}
+          body: |
+            Official signed RevelaCode Android installer.
+
+            - Version: ${{ env.ANDROID_VERSION_NAME }}
+            - Version code: ${{ env.ANDROID_VERSION_CODE }}
+            - APK signature verified against the permanent RevelaCode production certificate.
+            - Android emulator launch smoke test passed.
+          files: RevelaCode-Android.apk
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+          make_latest: true
+          overwrite_files: true
