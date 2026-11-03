@@ -134,12 +134,14 @@ jobs:
             "elimu-overview" \
             "elimu-open-nav" \
             "elimu-nav-website" \
+            "elimu-student-records" \
             "faith-study-library" \
             "community-create-post" \
             "community-back-feed" \
             "ai-chat-input" \
             "ai-vision-tools" \
-            "account-menu-notifications"; do
+            "account-menu-notifications" \
+            "account-menu-help"; do
             if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
               echo "Missing guided Demo Session element: $required_marker"
               exit 1
