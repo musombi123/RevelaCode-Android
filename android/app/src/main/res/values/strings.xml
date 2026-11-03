@@ -5,5 +5,5 @@
     <string name="package_name">com.revelacode.app</string>
     <string name="custom_url_scheme">com.revelacode.app</string>
   
-                                                                        <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+                                                                            <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>
