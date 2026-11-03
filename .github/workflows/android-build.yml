@@ -117,20 +117,27 @@ jobs:
       - name: Verify guided Demo Session chapters and Android-safe tour UI
         working-directory: frontend
         run: |
+          npm run test:demo
           for required_marker in \
             "revelacode_demo_progress_v1" \
             "Demo mode" \
             "welcome-entry" \
             "home-welcome" \
+            "home-hub-biashara" \
             "biashara-overview" \
+            "biashara-product-name" \
+            "biashara-create-product" \
             "shamba-overview" \
             "shamba-farms-screen" \
             "elimu-overview" \
+            "elimu-open-nav" \
             "elimu-nav-website" \
             "faith-study-library" \
             "community-create-post" \
+            "community-back-feed" \
             "ai-chat-input" \
-            "account-help-workspace"; do
+            "ai-vision-tools" \
+            "account-menu-notifications"; do
             if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
               echo "Missing guided Demo Session element: $required_marker"
               exit 1
