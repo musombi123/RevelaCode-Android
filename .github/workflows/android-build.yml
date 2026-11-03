@@ -139,6 +139,12 @@ jobs:
           fi
           echo "Shamba Live Vision entitlement routing is included in the Android production bundle."
 
+          if ! grep -R -q --include='*.js' 'standard-data-array' dist/assets; then
+            echo "Shamba data-list contract marker is missing from the Android production bundle."
+            exit 1
+          fi
+          echo "Shamba standard backend data-list contract is present in the Android production bundle."
+
       - name: Stage the production web bundle and brand asset
         run: |
           rm -rf www brand-assets
