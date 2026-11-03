@@ -114,6 +114,30 @@ jobs:
           fi
           echo "Shamba mobile workspace and native Android Back listener are included."
 
+      - name: Verify guided Demo Session chapters and Android-safe tour UI
+        working-directory: frontend
+        run: |
+          for required_marker in \
+            "revelacode_demo_progress_v1" \
+            "Demo mode" \
+            "welcome-entry" \
+            "home-welcome" \
+            "biashara-overview" \
+            "shamba-overview" \
+            "shamba-farms-screen" \
+            "elimu-overview" \
+            "elimu-nav-website" \
+            "faith-study-library" \
+            "community-create-post" \
+            "ai-chat-input" \
+            "account-help-workspace"; do
+            if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
+              echo "Missing guided Demo Session element: $required_marker"
+              exit 1
+            fi
+          done
+          echo "The bilingual guided Demo Session and hub anchors are present in the Android bundle."
+
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
         run: |
