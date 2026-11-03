@@ -115,6 +115,15 @@ jobs:
           fi
           echo "Compact Android home layout is present in the production bundle."
 
+      - name: Verify the Shamba reference mobile workspace is included
+        working-directory: frontend
+        run: |
+          if ! grep -R -q --include='*.js' 'shamba-mobile-ui' dist/assets; then
+            echo "Shamba reference mobile workspace was not found in the Android production bundle."
+            exit 1
+          fi
+          echo "Shamba reference mobile workspace is present in the Android production bundle."
+
       - name: Stage the production web bundle and brand asset
         run: |
           rm -rf www brand-assets
