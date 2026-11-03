@@ -101,6 +101,19 @@ jobs:
           npm run build
           test -s dist/index.html
 
+      - name: Verify Shamba footer and Android hardware Back support
+        working-directory: frontend
+        run: |
+          if ! grep -R -q --include='*.js' 'shamba-mobile-ui' dist/assets; then
+            echo "The Shamba mobile workspace is missing from the Android web bundle."
+            exit 1
+          fi
+          if ! grep -R -q --include='*.js' 'backButton' dist/assets; then
+            echo "The Capacitor Android hardware Back listener is missing from the web bundle."
+            exit 1
+          fi
+          echo "Shamba mobile workspace and native Android Back listener are included."
+
       - name: Verify MissionPulse responsive workspace is included
         working-directory: frontend
         run: |
