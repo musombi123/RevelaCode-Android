@@ -133,6 +133,11 @@ jobs:
             exit 1
           fi
           echo "RevelaAI Live Vision endpoint is present in the Android production bundle."
+          if ! grep -R -q --include='*.js' 'shamba-advanced-analytics' dist/assets; then
+            echo "Shamba Live Vision entitlement routing marker is missing from the Android production bundle."
+            exit 1
+          fi
+          echo "Shamba Live Vision entitlement routing is included in the Android production bundle."
 
       - name: Stage the production web bundle and brand asset
         run: |
