@@ -123,6 +123,16 @@ jobs:
             exit 1
           fi
           echo "Shamba reference mobile workspace is present in the Android production bundle."
+          if ! grep -R -q --include='*.js' 'shamba-diagnostics' dist/assets; then
+            echo "Shamba crop and soil diagnostic interface was not found in the Android production bundle."
+            exit 1
+          fi
+          echo "Shamba crop and soil diagnostic interface is present in the Android production bundle."
+          if ! grep -R -q --include='*.js' '/api/vision/analyze' dist/assets; then
+            echo "RevelaAI Live Vision endpoint is not referenced by the Android bundle."
+            exit 1
+          fi
+          echo "RevelaAI Live Vision endpoint is present in the Android production bundle."
 
       - name: Stage the production web bundle and brand asset
         run: |
