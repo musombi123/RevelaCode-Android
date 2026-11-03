@@ -167,7 +167,7 @@ jobs:
               exit 1
             fi
           done
-          echo "Premium plans launcher, M-Pesa checkout form, backend route and confirmation UI are bundled."
+          echo "Premium star, bilingual plans modal, M-Pesa checkout route, and verified subscription confirmation are bundled from the latest frontend main."
 
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
