@@ -149,7 +149,7 @@ jobs:
               exit 1
             fi
           done
-          echo "The current frontend revision contains the bilingual guided Demo Session, required hub anchors and locale-safe narration."
+          echo "Verified: bilingual guided Demo Session, five-step Elimu chapter, simulated RevelaAI chat, mock wallet, hub anchors and locale-safe narration."
 
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
