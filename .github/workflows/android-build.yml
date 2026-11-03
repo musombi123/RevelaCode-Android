@@ -139,9 +139,11 @@ jobs:
             "community-create-post" \
             "community-back-feed" \
             "ai-chat-input" \
+            "ai-send-message" \
             "ai-vision-tools" \
             "account-menu-notifications" \
-            "account-menu-help"; do
+            "account-menu-help" \
+            "account-payments-preview"; do
             if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
               echo "Missing guided Demo Session element: $required_marker"
               exit 1
