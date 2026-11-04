@@ -45,7 +45,7 @@ permissions:
 concurrency:
   # Keep debug verification independent from signed releases. New pushes replace
   # stale debug runs instead of leaving the latest Android UI build queued.
-  group: revelacode-android-${{ github.ref }}-${{ inputs.build_type || 'debug' }}
+  group: revelacode-android-${{ github.ref }}-${{ github.event.client_payload.build_type || inputs.build_type || 'debug' }}
   cancel-in-progress: true
 
 jobs:
@@ -53,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
+      ANDROID_BUILD_TYPE: ${{ github.event.client_payload.build_type || inputs.build_type || 'debug' }}
       ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || '2.1.0' }}
       ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || '3' }}
       # Native bundle must always target the deployed platform APIs; never leave production Vite URLs blank.
@@ -283,7 +284,7 @@ jobs:
 
       - name: Check whether release signing is configured
         id: signing_config
-        if: ${{ inputs.build_type == 'release' }}
+        if: ${{ env.ANDROID_BUILD_TYPE == 'release' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -298,7 +299,7 @@ jobs:
 
       - name: Configure release signing
         id: signing
-        if: ${{ inputs.build_type == 'release' && steps.signing_config.outputs.configured == 'true' }}
+        if: ${{ env.ANDROID_BUILD_TYPE == 'release' && steps.signing_config.outputs.configured == 'true' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/revelacode-release.jks
@@ -345,8 +346,24 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Publish the signed Android release
+        if: ${{ env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed == 'true' }}
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ env.ANDROID_VERSION_NAME }}
+          name: RevelaCode Android ${{ env.ANDROID_VERSION_NAME }}
+          body: |
+            RevelaCode Android release ${{ env.ANDROID_VERSION_NAME }}.
+            Version code: ${{ env.ANDROID_VERSION_CODE }}.
+            The APK is the direct-install package. The AAB is the Play Store upload package.
+            This release uses the permanent verified RevelaCode production signing certificate.
+          make_latest: true
+          files: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+
       - name: Fail release when signing secrets are incomplete
-        if: ${{ inputs.build_type == 'release' && steps.signing.outputs.release_signed != 'true' }}
+        if: ${{ env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed != 'true' }}
         run: |
           echo "Release build requested, but one or more Android signing secrets are missing or empty."
           echo "Required: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD."
