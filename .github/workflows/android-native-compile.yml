@@ -14,6 +14,19 @@ on:
       - "android/gradle/**"
       - "android/gradlew"
       - ".github/workflows/android-native-compile.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "android/app/src/main/java/**"
+      - "android/app/src/main/AndroidManifest.xml"
+      - "android/app/src/main/res/values/strings.xml"
+      - "android/app/build.gradle"
+      - "android/build.gradle"
+      - "android/gradle/**"
+      - "android/gradlew"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/android-native-compile.yml"
   workflow_dispatch:
 
 permissions:
@@ -70,6 +83,9 @@ jobs:
           node scripts/configure-android-permissions.mjs
           node scripts/configure-admob-android.mjs
           chmod +x android/gradlew
+          grep -F 'android:scheme="@string/custom_url_scheme"' android/app/src/main/AndroidManifest.xml
+          grep -F 'android:host="oauth"' android/app/src/main/AndroidManifest.xml
+          grep -F 'android:path="/callback"' android/app/src/main/AndroidManifest.xml
 
       - name: Compile Android debug variant
         run: |
