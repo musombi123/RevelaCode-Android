@@ -55,7 +55,7 @@ permissions:
 concurrency:
   # Keep debug verification independent from signed releases. New pushes replace
   # stale debug runs instead of leaving the latest Android UI build queued.
-  group: revelacode-android-${{ github.ref }}-${{ github.event.client_payload.build_type || inputs.build_type || 'debug' }}
+  group: revelacode-android-${{ github.ref }}-${{ github.event.client_payload.build_type || inputs.build_type || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && 'release' || 'debug') }}
   cancel-in-progress: true
 
 jobs:
@@ -63,9 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      ANDROID_BUILD_TYPE: ${{ github.event.client_payload.build_type || inputs.build_type || 'debug' }}
-      ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || '2.1.0' }}
-      ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || '3' }}
+      ANDROID_BUILD_TYPE: ${{ github.event.client_payload.build_type || inputs.build_type || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && 'release' || 'debug') }}
+      ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && '2.2.0' || '2.1.0') }}
+      ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && '4' || '3') }}
       # Native bundle must always target the deployed platform APIs; never leave production Vite URLs blank.
       VITE_API_URL: "https://revelacode-backend.onrender.com"
       VITE_API_BASE_URL: "https://revelacode-backend.onrender.com"
@@ -356,6 +356,29 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Fail release when signing secrets are incomplete
+        if: ${{ env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed != 'true' }}
+        run: |
+          echo "Release build requested, but one or more Android signing secrets are missing or empty."
+          echo "Required: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD."
+          exit 1
+
+      - name: Smoke-test APK launch on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          ANDROID_SMOKE_APK_PATH: ${{ steps.signing.outputs.release_signed == 'true' && 'android/app/build/outputs/apk/release/app-release.apk' || 'android/app/build/outputs/apk/debug/app-debug.apk' }}
+        with:
+          api-level: 36
+          # The runner uses KVM when available; SwiftShader keeps graphics headless.
+          emulator-boot-timeout: 900
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
+          # Avoid settings commands while ADB is reconnecting after a slow cold boot.
+          disable-animations: false
+          # The action executes each script line in a separate shell; invoke one complete Bash script.
+          script: bash .github/scripts/smoke-test-android.sh
       - name: Publish the signed Android release
         if: ${{ env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed == 'true' }}
         uses: softprops/action-gh-release@v3
@@ -372,27 +395,6 @@ jobs:
             android/app/build/outputs/apk/release/app-release.apk
             android/app/build/outputs/bundle/release/app-release.aab
 
-      - name: Fail release when signing secrets are incomplete
-        if: ${{ env.ANDROID_BUILD_TYPE == 'release' && steps.signing.outputs.release_signed != 'true' }}
-        run: |
-          echo "Release build requested, but one or more Android signing secrets are missing or empty."
-          echo "Required: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD."
-          exit 1
-
-      - name: Smoke-test APK launch on Android emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 36
-          # The runner uses KVM when available; SwiftShader keeps graphics headless.
-          emulator-boot-timeout: 900
-          target: google_apis
-          arch: x86_64
-          profile: pixel_2
-          emulator-options: -no-window -gpu swiftshader -no-snapshot -noaudio -no-boot-anim -camera-back none
-          # Avoid settings commands while ADB is reconnecting after a slow cold boot.
-          disable-animations: false
-          # The action executes each script line in a separate shell; invoke one complete Bash script.
-          script: bash .github/scripts/smoke-test-android.sh
 
       - name: Capture emulator boot diagnostics on smoke-test failure
         if: failure()

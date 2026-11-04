@@ -6,7 +6,7 @@ set -Eeuo pipefail
 
 SERIAL="${ANDROID_SERIAL:-emulator-5554}"
 PACKAGE="com.revelacode.app"
-APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
+APK_PATH="${ANDROID_SMOKE_APK_PATH:-android/app/build/outputs/apk/debug/app-debug.apk}"
 LOG_PATH="android-launch-logcat.txt"
 
 capture_logcat() {
