@@ -74,9 +74,9 @@ echo "RevelaCode launched successfully. PID: $app_pid"
 
 echo "Delivering an Android Google OAuth callback deep-link smoke test..."
 adb -s "$SERIAL" shell am start -W \
+  -n "$PACKAGE/.MainActivity" \
   -a android.intent.action.VIEW \
-  -d "com.revelacode.app://oauth/callback?oauth=error&reason=android_deeplink_smoke" \
-  -p "$PACKAGE"
+  -d "com.revelacode.app://oauth/callback?oauth=error&reason=android_deeplink_smoke"
 sleep 5
 
 app_pid_after_deeplink="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' || true)"
@@ -91,9 +91,9 @@ echo "Android OAuth callback deep link was delivered; app remains alive (PID: $a
 
 echo "Delivering the verified HTTPS Android App Link callback..."
 adb -s "$SERIAL" shell am start -W \
+  -n "$PACKAGE/.MainActivity" \
   -a android.intent.action.VIEW \
-  -d "https://revelacode.co.ke/oauth/android-callback?oauth=error&reason=android_app_link_smoke" \
-  -p "$PACKAGE"
+  -d "https://revelacode.co.ke/oauth/android-callback?oauth=error&reason=android_app_link_smoke"
 sleep 5
 
 app_pid_after_app_link="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' || true)"
