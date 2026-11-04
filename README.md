@@ -139,3 +139,29 @@ On Windows, use `android\\gradlew.bat assembleDebug` from the `android` director
 ## Release identity
 
 The current workflow defaults are version name `2.1.0` and version code `3`, matching the existing frontend Android packaging workflow. Increase version code for each published release. Debug artifacts are for controlled device testing; production releases must be signed with the existing release keystore.
+
+
+## Google sign-in (Android)
+
+The APK uses the existing backend-driven Google OpenID Connect flow and the
+same Google **Web application** OAuth client as the website. It does not embed a
+Google client secret or require an Android OAuth client/SHA-1 fingerprint for
+this server-side authorization-code flow.
+
+- Backend start URL: `/api/oauth/google/start?mode=login&client=android`
+- Google redirect URI (registered on the Web application client):
+  `https://revelacode-backend.onrender.com/api/oauth/google/callback`
+- Android return URI:
+  `com.revelacode.app://oauth/callback`
+- The backend returns a short-lived, single-use login ticket. The APK exchanges
+  it over HTTPS at `/api/oauth/google/exchange`; the ticket itself is not a
+  RevelaCode JWT.
+
+The Android build installs `@capacitor/browser` for the system Custom Tabs
+browser and registers the exact callback scheme/host/path in
+`AndroidManifest.xml`. The web app's Capacitor App listener also checks
+`getLaunchUrl()` to handle a callback when Android recreates the activity.
+
+Render must have `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_WEB_CLIENT_SECRET`,
+`GOOGLE_OAUTH_REDIRECT_URI`, and
+`GOOGLE_ANDROID_RETURN_URI=com.revelacode.app://oauth/callback` set.
