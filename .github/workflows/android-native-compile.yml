@@ -6,7 +6,10 @@ on:
     paths:
       - "android/app/src/main/java/**"
       - "android/app/src/main/AndroidManifest.xml"
+      - "android/app/src/main/res/values/strings.xml"
       - "android/app/build.gradle"
+      - "package.json"
+      - "package-lock.json"
       - "android/build.gradle"
       - "android/gradle/**"
       - "android/gradlew"
