@@ -1,0 +1,65 @@
+name: Android OAuth signing fingerprint
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fingerprint:
+    name: Read release signing certificate fingerprint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Validate signing secrets and extract certificate fingerprint
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +x
+
+          if [[ -z "${ANDROID_KEYSTORE_BASE64}" || -z "${ANDROID_KEYSTORE_PASSWORD}" || -z "${ANDROID_KEY_ALIAS}" ]]; then
+            echo "::error::Release signing secrets are incomplete. Required: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS."
+            exit 1
+          fi
+
+          KEYSTORE_PATH="${RUNNER_TEMP}/revelacode-release.jks"
+          printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${KEYSTORE_PATH}"
+          test -s "${KEYSTORE_PATH}"
+
+          CERT_INFO="$(keytool -list -v -keystore "${KEYSTORE_PATH}" -alias "${ANDROID_KEY_ALIAS}" -storepass "${ANDROID_KEYSTORE_PASSWORD}" 2>/dev/null)"
+          SHA1="$(printf '%s\n' "${CERT_INFO}" | awk -F': ' '/SHA1:/{print $2; exit}')"
+          SHA256="$(printf '%s\n' "${CERT_INFO}" | awk -F': ' '/SHA256:/{print $2; exit}')"
+
+          if [[ -z "${SHA1}" ]]; then
+            echo "::error::Could not read the SHA-1 certificate fingerprint. Check the keystore, password and alias."
+            exit 1
+          fi
+
+          {
+            echo "## RevelaCode Android release signing certificate"
+            echo
+            echo "- **Package name:** `com.revelacode.app`"
+            echo "- **SHA-1:** `${SHA1}`"
+            if [[ -n "${SHA256}" ]]; then
+              echo "- **SHA-256:** `${SHA256}`"
+            fi
+            echo
+            echo "These are public certificate fingerprints. The keystore and its passwords were not uploaded or printed."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          echo "SHA-1: ${SHA1}"
+          if [[ -n "${SHA256}" ]]; then
+            echo "SHA-256: ${SHA256}"
+          fi
+
+          rm -f "${KEYSTORE_PATH}"
