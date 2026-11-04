@@ -120,7 +120,7 @@ jobs:
         working-directory: frontend
         run: |
           npm run test:demo
-          if ! grep -R -F -q --include='*.js' "android-demo-disabled" dist/assets; then
+          if ! grep -R -F -q --include='*.js' "disabled-android" dist/assets; then
             echo "Android demo exclusion policy is missing from the production bundle."
             exit 1
           fi
