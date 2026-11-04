@@ -86,6 +86,9 @@ jobs:
           grep -F 'android:scheme="@string/custom_url_scheme"' android/app/src/main/AndroidManifest.xml
           grep -F 'android:host="oauth"' android/app/src/main/AndroidManifest.xml
           grep -F 'android:path="/callback"' android/app/src/main/AndroidManifest.xml
+          grep -F 'android:autoVerify="true"' android/app/src/main/AndroidManifest.xml
+          grep -F 'android:host="revelacode.co.ke"' android/app/src/main/AndroidManifest.xml
+          grep -F 'android:path="/oauth/android-callback"' android/app/src/main/AndroidManifest.xml
 
       - name: Compile Android debug variant
         run: |
