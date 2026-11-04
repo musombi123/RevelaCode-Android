@@ -207,6 +207,17 @@ jobs:
             exit 1
           fi
           echo "Shamba crop and soil diagnostic interface is present in the Android production bundle."
+          for required_marker in \
+            "Crop specifications" \
+            "Farm specifications & registration" \
+            "Farmer verification" \
+            "Shamba Trust Centre"; do
+            if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
+              echo "Missing Shamba Android verification/specification control: $required_marker"
+              exit 1
+            fi
+          done
+          echo "Shamba crop/farm specification entry points and farmer verification workspace are included."
           if ! grep -R -q --include='*.js' '/api/vision/analyze' dist/assets; then
             echo "RevelaAI Live Vision endpoint is not referenced by the Android bundle."
             exit 1
