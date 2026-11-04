@@ -11,6 +11,8 @@
     "Includes the latest Premium plan catalogue and complete plan feature lists.",
     "Displays free Community and Faith access and per-hub trial status.",
     "Retains secure M-Pesa STK checkout and backend payment verification.",
-    "Includes current configured Super Admin dashboard identity handling."
+    "Includes current configured Super Admin dashboard identity handling.",
+    "Uses the permanent production keystore; the signed APK is smoke-tested before publishing.",
+    "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names."
   ]
 }
