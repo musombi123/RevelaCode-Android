@@ -83,7 +83,7 @@ app_pid_after_deeplink="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' |
 if [[ -z "$app_pid_after_deeplink" ]]; then
   echo "RevelaCode crashed after receiving its OAuth callback deep link."
   capture_logcat
-  grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com\\.revelacode\\.app' "$LOG_PATH" | tail -n 100 || true
+  grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com\.revelacode\.app' "$LOG_PATH" | tail -n 100 || true
   exit 1
 fi
 
@@ -100,7 +100,7 @@ app_pid_after_app_link="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' |
 if [[ -z "$app_pid_after_app_link" ]]; then
   echo "RevelaCode crashed after receiving its HTTPS OAuth App Link."
   capture_logcat
-  grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com\\.revelacode\\.app' "$LOG_PATH" | tail -n 100 || true
+  grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com\.revelacode\.app' "$LOG_PATH" | tail -n 100 || true
   exit 1
 fi
 
