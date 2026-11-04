@@ -338,12 +338,20 @@ jobs:
           printf '%s\\n' "$CERT_OUTPUT" | grep -Eiq "Signer #1 certificate SHA-256 digest: $EXPECTED_SHA256"
           echo "Verified APK signature matches the permanent RevelaCode production certificate."
 
+      - name: Prepare stable Android release asset names
+        if: ${{ steps.signing.outputs.release_signed == 'true' }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk RevelaCode-Android.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab RevelaCode-Android.aab
+          test -s RevelaCode-Android.apk
+          test -s RevelaCode-Android.aab
+
       - name: Upload signed release APK
         if: ${{ steps.signing.outputs.release_signed == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: revelacode-android-release-v${{ env.ANDROID_VERSION_NAME }}-code${{ env.ANDROID_VERSION_CODE }}
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: RevelaCode-Android.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -352,7 +360,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: revelacode-android-aab-v${{ env.ANDROID_VERSION_NAME }}-code${{ env.ANDROID_VERSION_CODE }}
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          path: RevelaCode-Android.aab
           if-no-files-found: error
           retention-days: 30
 
@@ -392,8 +400,8 @@ jobs:
             This release uses the permanent verified RevelaCode production signing certificate.
           make_latest: true
           files: |
-            android/app/build/outputs/apk/release/app-release.apk
-            android/app/build/outputs/bundle/release/app-release.aab
+            RevelaCode-Android.apk
+            RevelaCode-Android.aab
 
 
       - name: Capture emulator boot diagnostics on smoke-test failure
