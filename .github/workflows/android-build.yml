@@ -116,40 +116,15 @@ jobs:
           fi
           echo "Shamba mobile workspace and native Android Back listener are included."
 
-      - name: Verify guided Demo Session chapters and Android-safe tour UI
+      - name: Verify web demo fixtures and Android demo exclusion policy
         working-directory: frontend
         run: |
           npm run test:demo
-          for required_marker in \
-            "revelacode_demo_progress_v1" \
-            "Demo mode" \
-            "welcome-entry" \
-            "home-welcome" \
-            "home-hub-biashara" \
-            "biashara-overview" \
-            "biashara-product-name" \
-            "biashara-create-product" \
-            "shamba-overview" \
-            "shamba-farms-screen" \
-            "elimu-overview" \
-            "elimu-open-nav" \
-            "elimu-nav-website" \
-            "elimu-student-records" \
-            "faith-study-library" \
-            "community-create-post" \
-            "community-back-feed" \
-            "ai-chat-input" \
-            "ai-send-message" \
-            "ai-vision-tools" \
-            "account-menu-notifications" \
-            "account-menu-help" \
-            "account-payments-preview"; do
-            if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
-              echo "Missing guided Demo Session element: $required_marker"
-              exit 1
-            fi
-          done
-          echo "Verified: bilingual guided Demo Session, five-step Elimu chapter, simulated RevelaAI chat, mock wallet, hub anchors and locale-safe narration."
+          if ! grep -R -F -q --include='*.js' "android-demo-disabled" dist/assets; then
+            echo "Android demo exclusion policy is missing from the production bundle."
+            exit 1
+          fi
+          echo "Web demo fixtures pass, and the Android-specific demo exclusion policy is bundled."
 
       - name: Verify premium plans and M-Pesa checkout are included
         working-directory: frontend
