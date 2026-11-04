@@ -71,3 +71,37 @@ if [[ -z "$app_pid" ]]; then
 fi
 
 echo "RevelaCode launched successfully. PID: $app_pid"
+
+echo "Delivering an Android Google OAuth callback deep-link smoke test..."
+adb -s "$SERIAL" shell am start -W \
+  -a android.intent.action.VIEW \
+  -d "com.revelacode.app://oauth/callback?oauth=error&reason=android_deeplink_smoke" \
+  -p "$PACKAGE"
+sleep 5
+
+app_pid_after_deeplink="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' || true)"
+if [[ -z "$app_pid_after_deeplink" ]]; then
+  echo "RevelaCode crashed after receiving its OAuth callback deep link."
+  capture_logcat
+  grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com\.revelacode\.app' "$LOG_PATH" | tail -n 100 || true
+  exit 1
+fi
+
+echo "Android OAuth callback deep link was delivered; app remains alive (PID: $app_pid_after_deeplink)."
+
+echo "Delivering the verified HTTPS Android App Link callback..."
+adb -s "$SERIAL" shell am start -W \
+  -a android.intent.action.VIEW \
+  -d "https://revelacode.co.ke/oauth/android-callback?oauth=error&reason=android_app_link_smoke" \
+  -p "$PACKAGE"
+sleep 5
+
+app_pid_after_app_link="$(adb -s "$SERIAL" shell pidof "$PACKAGE" | tr -d '\r' || true)"
+if [[ -z "$app_pid_after_app_link" ]]; then
+  echo "RevelaCode crashed after receiving its HTTPS OAuth App Link."
+  capture_logcat
+  grep -E -i 'FATAL EXCEPTION|AndroidRuntime|Fatal signal|Process: com\.revelacode\.app' "$LOG_PATH" | tail -n 100 || true
+  exit 1
+fi
+
+echo "HTTPS Android App Link was delivered; app remains alive (PID: $app_pid_after_app_link)."

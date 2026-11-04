@@ -28,6 +28,26 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Google OAuth returns here with a short-lived, single-use backend login ticket. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="@string/custom_url_scheme"
+                    android:host="oauth"
+                    android:path="/callback" />
+            </intent-filter>
+            <!-- Primary OAuth return: verified HTTPS App Link associated with revelacode.co.ke. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="revelacode.co.ke"
+                    android:path="/oauth/android-callback" />
+            </intent-filter>
         </activity>
 
         <provider
