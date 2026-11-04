@@ -11,6 +11,16 @@ on:
       - "scripts/**"
       - ".github/scripts/**"
       - "android/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/android-build.yml"
+      - ".github/scripts/**"
+      - "scripts/**"
+      - "android/**"
+      - "capacitor.config.json"
+      - "package.json"
+      - "package-lock.json"
   repository_dispatch:
     types: [frontend-updated]
   workflow_dispatch:
