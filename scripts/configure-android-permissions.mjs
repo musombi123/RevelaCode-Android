@@ -105,7 +105,7 @@ const pluginSource = [
   '            resolvePermissionStates(call);',
   '            return;',
   '        }',
-  '        if (hasAliasAccess(alias)) {'
+  '        if (hasAliasAccess(alias)) {',
   '            resolvePermissionStates(call);',
   '            return;',
   '        }',
