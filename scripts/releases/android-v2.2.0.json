@@ -16,5 +16,6 @@
     "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names.",
     "Includes the bilingual guided Demo Session in the Android WebView, resumable tour progress and offline sample fixtures; demo writes and payment actions are simulated while Demo mode is active.",
     "Built from the merged frontend main revision after re-enabling Demo Session on Android; publication requires production signing fingerprint verification and emulator launch smoke test."
-  ]
+  ],
+  "buildAttempt": 3
 }
