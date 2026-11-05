@@ -8,15 +8,12 @@ import android.os.Build;
 import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
-import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 import com.getcapacitor.PluginMethod;
-
-import java.util.Locale;
 
 @CapacitorPlugin(
     name = "RevelaPermissions",
@@ -65,7 +62,7 @@ public class RevelaPermissionsPlugin extends Plugin {
             resolvePermissionStates(call);
             return;
         }
-        if ("location".equals(alias) ? hasLocationAccess() : getPermissionState(alias) == PermissionState.GRANTED) {
+        if (hasAliasAccess(alias)) {
             resolvePermissionStates(call);
             return;
         }
@@ -80,30 +77,61 @@ public class RevelaPermissionsPlugin extends Plugin {
     private void resolvePermissionStates(PluginCall call) {
         JSObject result = new JSObject();
         result.put("camera", permissionState("camera"));
-        result.put("location", locationPermissionState());
+        result.put("location", permissionState("location"));
         result.put("microphone", permissionState("microphone"));
-        result.put("notifications", notificationPermissionState());
+        result.put("notifications", permissionState("notifications"));
         call.resolve(result);
     }
 
+    /*
+     * Read permission state from Android itself. Capacitor's alias-state map can
+     * be empty in an R8-minified release if an annotation is not retained; the
+     * app must not dereference a nullable PermissionState during startup.
+     */
     private String permissionState(String alias) {
-        return getPermissionState(alias).toString().toLowerCase(Locale.ROOT);
-    }
+        if ("location".equals(alias)) {
+            if (hasLocationAccess()) return "granted";
+            return shouldShowRationale(Manifest.permission.ACCESS_COARSE_LOCATION)
+                || shouldShowRationale(Manifest.permission.ACCESS_FINE_LOCATION)
+                ? "prompt-with-rationale"
+                : "prompt";
+        }
 
-    private String notificationPermissionState() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        if ("notifications".equals(alias) && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return "granted";
         }
-        return permissionState("notifications");
+
+        String permission = permissionString(alias);
+        if (permission == null) return "prompt";
+        if (hasPermission(permission)) return "granted";
+        return shouldShowRationale(permission) ? "prompt-with-rationale" : "prompt";
+    }
+
+    private String permissionString(String alias) {
+        if ("camera".equals(alias)) return Manifest.permission.CAMERA;
+        if ("microphone".equals(alias)) return Manifest.permission.RECORD_AUDIO;
+        if ("notifications".equals(alias)) return Manifest.permission.POST_NOTIFICATIONS;
+        return null;
+    }
+
+    private boolean hasAliasAccess(String alias) {
+        if ("location".equals(alias)) return hasLocationAccess();
+        if ("notifications".equals(alias) && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true;
+        String permission = permissionString(alias);
+        return permission != null && hasPermission(permission);
+    }
+
+    private boolean hasPermission(String permission) {
+        return getContext().checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean shouldShowRationale(String permission) {
+        return getActivity() != null && getActivity().shouldShowRequestPermissionRationale(permission);
     }
 
     private boolean hasLocationAccess() {
-        return getContext().checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            || getContext().checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private String locationPermissionState() {
-        return hasLocationAccess() ? "granted" : permissionState("location");
+        return hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+            || hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
     @PluginMethod
