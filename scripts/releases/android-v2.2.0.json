@@ -13,6 +13,7 @@
     "Retains secure M-Pesa STK checkout and backend payment verification.",
     "Includes current configured Super Admin dashboard identity handling.",
     "Uses the permanent production keystore; the signed APK is smoke-tested before publishing.",
-    "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names."
+    "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names.",
+    "Rebuilt from the verified main branch after the Android key-alias whitespace fix; signed APK must pass certificate fingerprint validation and emulator launch test before publication."
   ]
 }
