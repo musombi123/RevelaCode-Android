@@ -127,15 +127,26 @@ jobs:
           fi
           echo "Shamba mobile workspace and native Android Back listener are included."
 
-      - name: Verify web demo fixtures and Android demo exclusion policy
+      - name: Verify guided Demo Session is included in Android
         working-directory: frontend
         run: |
           npm run test:demo
-          if ! grep -R -F -q --include='*.js' "disabled-android" dist/assets; then
-            echo "Android demo exclusion policy is missing from the production bundle."
+          for required_marker in \
+            "revelacode_demo_progress_v1" \
+            "Try the Demo" \
+            "Resume demo" \
+            "Browse demo systems" \
+            "Demo mode — nothing is saved"; do
+            if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
+              echo "Missing Android Demo Session marker: $required_marker"
+              exit 1
+            fi
+          done
+          if grep -R -F -q --include='*.js' "disabled-android" dist/assets; then
+            echo "The production Android bundle still contains the Android demo exclusion."
             exit 1
           fi
-          echo "Web demo fixtures pass, and the Android-specific demo exclusion policy is bundled."
+          echo "Bilingual demo entry points, persisted progress, presentation mode and sample-data safety are bundled for Android."
 
       - name: Verify premium plans and M-Pesa checkout are included
         working-directory: frontend
