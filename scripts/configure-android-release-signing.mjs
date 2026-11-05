@@ -4,7 +4,9 @@ import { resolve } from "node:path";
 
 const gradlePath = resolve("android/app/build.gradle");
 const keystorePath = String(process.env.ANDROID_KEYSTORE_PATH || "").trim();
+const keyAlias = String(process.env.ANDROID_KEY_ALIAS || "").trim();
 if (!keystorePath) throw new Error("ANDROID_KEYSTORE_PATH is required to configure release signing.");
+if (!keyAlias) throw new Error("ANDROID_KEY_ALIAS is required to configure release signing.");
 
 let source = await readFile(gradlePath, "utf8");
 if (!/\bbuildTypes\s*\{\s*release\s*\{/.test(source)) {
@@ -17,7 +19,7 @@ const signingBlock = `
             storeFile file(System.getenv("ANDROID_KEYSTORE_PATH"))
             storeType "JKS"
             storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-            keyAlias System.getenv("ANDROID_KEY_ALIAS")
+            keyAlias (System.getenv("ANDROID_KEY_ALIAS") ?: "").trim()
             keyPassword System.getenv("ANDROID_KEY_PASSWORD")
         }
     }
