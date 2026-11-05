@@ -4,7 +4,7 @@
   "versionCode": 4,
   "releaseType": "signed-production",
   "frontendRepository": "musombi123/RevelaCode-Frontend",
-  "frontendCommit": "2d0911d77f891eff62f690dc2aa5fe8552dd3767",
+  "frontendCommit": "58b67ce7c6b27a230b4d3f4244bcc3d198ff2e5e",
   "backendRepository": "musombi123/RevelaCode-Backend",
   "backendCommit": "2ef67afac143fe743616eb274983516de639445d",
   "notes": [
@@ -14,6 +14,7 @@
     "Includes current configured Super Admin dashboard identity handling.",
     "Uses the permanent production keystore; the signed APK is smoke-tested before publishing.",
     "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names.",
-    "Rebuilt from the verified main branch after the Android key-alias whitespace fix; signed APK must pass certificate fingerprint validation and emulator launch test before publication."
+    "Includes the bilingual guided Demo Session in the Android WebView, resumable tour progress and offline sample fixtures; demo writes and payment actions are simulated while Demo mode is active.",
+    "Built from the merged frontend main revision after re-enabling Demo Session on Android; publication requires production signing fingerprint verification and emulator launch smoke test."
   ]
 }
