@@ -15,6 +15,7 @@ import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 import com.getcapacitor.PluginMethod;
 
+
 @CapacitorPlugin(
     name = "RevelaPermissions",
     permissions = {
@@ -83,24 +84,15 @@ public class RevelaPermissionsPlugin extends Plugin {
         call.resolve(result);
     }
 
-    /*
-     * Read permission state from Android itself. Capacitor's alias-state map can
-     * be empty in an R8-minified release if an annotation is not retained; the
-     * app must not dereference a nullable PermissionState during startup.
-     */
+    /* Read the state directly from Android, not Capacitor's nullable alias-state map. */
     private String permissionState(String alias) {
         if ("location".equals(alias)) {
             if (hasLocationAccess()) return "granted";
             return shouldShowRationale(Manifest.permission.ACCESS_COARSE_LOCATION)
                 || shouldShowRationale(Manifest.permission.ACCESS_FINE_LOCATION)
-                ? "prompt-with-rationale"
-                : "prompt";
+                ? "prompt-with-rationale" : "prompt";
         }
-
-        if ("notifications".equals(alias) && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            return "granted";
-        }
-
+        if ("notifications".equals(alias) && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return "granted";
         String permission = permissionString(alias);
         if (permission == null) return "prompt";
         if (hasAndroidPermission(permission)) return "granted";
