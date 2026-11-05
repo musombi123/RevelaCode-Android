@@ -16,8 +16,10 @@
     "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names.",
     "Includes the bilingual guided Demo Session in the Android WebView, resumable tour progress and offline sample fixtures; demo writes and payment actions are simulated while Demo mode is active.",
     "Built from the merged frontend main revision after re-enabling Demo Session on Android; publication requires production signing fingerprint verification and emulator launch smoke test.",
-    "Updates Capacitor Android to 8.5.3 to resolve the Android runtime permission-state crash; the debug APK passed emulator launch and OAuth deep-link checks."
+    "Updates Capacitor Android to 8.5.3 to resolve the Android runtime permission-state crash; the debug APK passed emulator launch and OAuth deep-link checks.",
+    "Uses Android checkSelfPermission for camera, location, microphone and notification status to avoid nullable Capacitor permission-state lookups in R8-minified production builds.",
+    "Retains Capacitor permission annotations and callback methods through R8; latest corrected debug APK passed Android emulator launch and OAuth deep-link smoke tests."
   ],
-  "buildAttempt": 4,
+  "buildAttempt": 5,
   "capacitorAndroidVersion": "8.5.3"
 }
