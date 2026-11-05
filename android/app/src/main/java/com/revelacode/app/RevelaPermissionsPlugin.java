@@ -103,7 +103,7 @@ public class RevelaPermissionsPlugin extends Plugin {
 
         String permission = permissionString(alias);
         if (permission == null) return "prompt";
-        if (hasPermission(permission)) return "granted";
+        if (hasAndroidPermission(permission)) return "granted";
         return shouldShowRationale(permission) ? "prompt-with-rationale" : "prompt";
     }
 
@@ -118,10 +118,10 @@ public class RevelaPermissionsPlugin extends Plugin {
         if ("location".equals(alias)) return hasLocationAccess();
         if ("notifications".equals(alias) && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true;
         String permission = permissionString(alias);
-        return permission != null && hasPermission(permission);
+        return permission != null && hasAndroidPermission(permission);
     }
 
-    private boolean hasPermission(String permission) {
+    private boolean hasAndroidPermission(String permission) {
         return getContext().checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -130,8 +130,8 @@ public class RevelaPermissionsPlugin extends Plugin {
     }
 
     private boolean hasLocationAccess() {
-        return hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-            || hasPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+        return hasAndroidPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+            || hasAndroidPermission(Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
     @PluginMethod
