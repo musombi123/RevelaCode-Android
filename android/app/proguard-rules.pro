@@ -25,3 +25,12 @@
 -keepclassmembers class * { @com.getcapacitor.PluginMethod <methods>; }
 -keep class com.revelacode.app.MainActivity { *; }
 -keep class com.revelacode.app.RevelaPermissionsPlugin { *; }
+
+# Keep runtime permission metadata and callback methods readable after R8 shrinking.
+# Capacitor resolves @CapacitorPlugin/@Permission annotations reflectively in release builds.
+-keepattributes *Annotation*
+-keep @interface com.getcapacitor.annotation.** { *; }
+-keep @interface com.getcapacitor.PluginMethod { *; }
+-keepclassmembers class * extends com.getcapacitor.Plugin {
+    @com.getcapacitor.annotation.PermissionCallback <methods>;
+}
