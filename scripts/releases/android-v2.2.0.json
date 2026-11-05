@@ -15,7 +15,9 @@
     "Uses the permanent production keystore; the signed APK is smoke-tested before publishing.",
     "Publishes the stable RevelaCode-Android.apk and RevelaCode-Android.aab asset names.",
     "Includes the bilingual guided Demo Session in the Android WebView, resumable tour progress and offline sample fixtures; demo writes and payment actions are simulated while Demo mode is active.",
-    "Built from the merged frontend main revision after re-enabling Demo Session on Android; publication requires production signing fingerprint verification and emulator launch smoke test."
+    "Built from the merged frontend main revision after re-enabling Demo Session on Android; publication requires production signing fingerprint verification and emulator launch smoke test.",
+    "Updates Capacitor Android to 8.5.3 to resolve the Android runtime permission-state crash; the debug APK passed emulator launch and OAuth deep-link checks."
   ],
-  "buildAttempt": 3
+  "buildAttempt": 4,
+  "capacitorAndroidVersion": "8.5.3"
 }
