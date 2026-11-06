@@ -262,6 +262,7 @@ jobs:
           node scripts/configure-android-permissions.mjs
           node scripts/configure-admob-android.mjs
           node scripts/set-android-release-version.mjs
+          node scripts/verify-android-release-identity.mjs
           node scripts/optimize-android-release.mjs
           chmod +x android/gradlew
 
