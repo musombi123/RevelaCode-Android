@@ -2,11 +2,11 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const appVersion = String(process.env.ANDROID_VERSION_NAME || "2.1.0").trim();
-const rawCode = String(process.env.ANDROID_VERSION_CODE || "3").trim();
+const appVersion = String(process.env.ANDROID_VERSION_NAME || "2.2.1").trim();
+const rawCode = String(process.env.ANDROID_VERSION_CODE || "5").trim();
 
 if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(appVersion)) {
-  throw new Error("ANDROID_VERSION_NAME must be a semantic version such as 2.1.0.");
+  throw new Error("ANDROID_VERSION_NAME must be a semantic version such as 2.2.1.");
 }
 if (!/^\d+$/.test(rawCode) || Number(rawCode) < 1) {
   throw new Error("ANDROID_VERSION_CODE must be a positive integer.");
