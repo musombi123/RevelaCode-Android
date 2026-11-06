@@ -41,12 +41,12 @@ on:
       version_name:
         description: "Android version name"
         required: true
-        default: "2.1.0"
+        default: "2.2.1"
         type: string
       version_code:
         description: "Android version code (must increase for each published release)"
         required: true
-        default: "3"
+        default: "5"
         type: string
 
 permissions:
@@ -64,8 +64,8 @@ jobs:
     timeout-minutes: 60
     env:
       ANDROID_BUILD_TYPE: ${{ github.event.client_payload.build_type || inputs.build_type || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && 'release' || 'debug') }}
-      ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && '2.2.0' || '2.1.0') }}
-      ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && '4' || '3') }}
+      ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || '2.2.1' }}
+      ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || '5' }}
       # Native bundle must always target the deployed platform APIs; never leave production Vite URLs blank.
       VITE_API_URL: "https://revelacode-backend.onrender.com"
       VITE_API_BASE_URL: "https://revelacode-backend.onrender.com"

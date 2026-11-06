@@ -138,7 +138,7 @@ On Windows, use `android\\gradlew.bat assembleDebug` from the `android` director
 
 ## Release identity
 
-The current workflow defaults are version name `2.1.0` and version code `3`, matching the existing frontend Android packaging workflow. Increase version code for each published release. Debug artifacts are for controlled device testing; production releases must be signed with the existing release keystore.
+The current Android release baseline is version name `2.2.1` and version code `5`. The preceding published release is `2.2.0` / version code `4`; never reuse a published version code. Debug builds use the same current baseline unless a manual workflow run specifies a different version. Increase version code for each published release. Debug artifacts are for controlled device testing; production releases must be signed with the existing release keystore.
 
 
 ## Google sign-in (Android)
