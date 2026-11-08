@@ -65,6 +65,7 @@ jobs:
     env:
       ANDROID_BUILD_TYPE: ${{ github.event.client_payload.build_type || inputs.build_type || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-android-release]') && 'release' || 'debug') }}
       ANDROID_VERSION_NAME: ${{ github.event.client_payload.version_name || inputs.version_name || '2.2.1' }}
+      VITE_APP_VERSION: ${{ github.event.client_payload.version_name || inputs.version_name || '2.2.1' }}
       ANDROID_VERSION_CODE: ${{ github.event.client_payload.version_code || inputs.version_code || '5' }}
       # Native bundle must always target the deployed platform APIs; never leave production Vite URLs blank.
       VITE_API_URL: "https://revelacode-backend.onrender.com"
