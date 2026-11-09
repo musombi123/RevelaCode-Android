@@ -72,7 +72,7 @@ async function main() {
 
   const appId = configuredAppId || "ca-app-pub-3940256099942544~3347511713";
 
-  if (!/^ca-app-pub-\\d+~\\d+$/.test(appId)) {
+  if (!/^ca-app-pub-\d+~\d+$/.test(appId)) {
     throw new Error(
       `${APP_ID_KEY} must be a valid AdMob application ID (format ca-app-pub-...~...).`,
     );
