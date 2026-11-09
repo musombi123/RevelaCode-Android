@@ -68,22 +68,22 @@ Add a fine-grained GitHub token as the **frontend repository secret**:
 
 The frontend repository's dispatch workflow uses this token only to send a `frontend-updated` repository-dispatch event containing the exact frontend commit SHA. Until that secret is configured, run the Android workflow manually and select the desired frontend ref.
 
-## Build secrets
+## Build configuration
 
-Configure these only in the Android repository's GitHub Actions secrets:
+Configure the AdMob IDs below as **repository variables** in the Android repository's GitHub Actions settings. Configure the signing credentials as **repository secrets**:
 
-| Secret | Purpose |
+| Setting | Purpose |
 |---|---|
-| `VITE_ADMOB_ANDROID_APP_ID` | Production AdMob Android application ID |
-| `VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID` | Community Feed native ad unit ID |
-| `VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID` | Community Home native ad unit ID |
-| `VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID` | Faith Overview native ad unit ID |
-| `ANDROID_KEYSTORE_BASE64` | Base64-encoded release keystore |
-| `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
-| `ANDROID_KEY_ALIAS` | Release key alias |
-| `ANDROID_KEY_PASSWORD` | Release key password |
+| Repository variable `VITE_ADMOB_ANDROID_APP_ID` | Production AdMob Android application ID |
+| Repository variable `VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID` | Community Feed native ad unit ID |
+| Repository variable `VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID` | Community Home native ad unit ID |
+| Repository variable `VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID` | Faith Overview native ad unit ID |
+| Repository secret `ANDROID_KEYSTORE_BASE64` | Base64-encoded release keystore |
+| Repository secret `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
+| Repository secret `ANDROID_KEY_ALIAS` | Release key alias |
+| Repository secret `ANDROID_KEY_PASSWORD` | Release key password |
 
-The distributable Android build requires the production App ID and all three production native ad-unit IDs. If any are missing, the build stops with the exact missing secret names; it never silently packages Google's sample test IDs. The separate native compile-check workflow may use Google's official test App ID because it only compiles source and does not publish an APK. Without all signing secrets, the main workflow produces a debug APK for controlled testing only and does not pretend it is a signed release.
+The distributable Android build requires the production App ID and all three production native ad-unit IDs from repository variables. If any are missing, the build stops with the exact missing variable names; it never silently packages Google's sample test IDs. The separate native compile-check workflow may use Google's official test App ID because it only compiles source and does not publish an APK. Without all signing secrets, the main workflow produces a debug APK for controlled testing only and does not pretend it is a signed release.
 
 Never commit `.env`, keystores, passwords, signing properties, or production credentials.
 
