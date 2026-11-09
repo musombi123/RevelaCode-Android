@@ -275,7 +275,19 @@ jobs:
           chmod +x android/gradlew
 
       - name: Build installable debug APK
-        run: cd android && ./gradlew --no-daemon assembleDebug
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          for attempt in 1 2 3; do
+            echo "Gradle debug build attempt ${attempt}/3"
+            if ./gradlew --no-daemon --retry 3 assembleDebug; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then sleep 15; fi
+          done
+          echo "Gradle debug build failed after three attempts."
+          exit 1
 
       - name: Enable KVM access for Android emulator
         shell: bash
@@ -360,7 +372,19 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: cd android && ./gradlew --no-daemon assembleRelease bundleRelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd android
+          for attempt in 1 2 3; do
+            echo "Gradle signed release build attempt ${attempt}/3"
+            if ./gradlew --no-daemon --retry 3 assembleRelease bundleRelease; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then sleep 15; fi
+          done
+          echo "Gradle signed release build failed after three attempts."
+          exit 1
 
       - name: Verify release APK signature and certificate identity
         if: ${{ steps.signing.outputs.release_signed == 'true' }}
