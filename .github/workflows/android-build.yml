@@ -110,7 +110,12 @@ jobs:
           VITE_API_BASE_URL: "https://revelacode-backend.onrender.com"
           VITE_BACKEND_URL: "https://revelacode-backend.onrender.com"
           VITE_REVELAAI_API_URL: "https://revelaai.onrender.com"
+          # Use Ubuntu's maintained libvips package instead of relying on
+          # GitHub release-asset downloads for sharp's bundled libvips binary.
+          SHARP_FORCE_GLOBAL_LIBVIPS: "1"
         run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev
           npm ci
           npm run build
           test -s dist/index.html
