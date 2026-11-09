@@ -42,6 +42,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="revelacode.co.ke" android:path="/oauth/android-callback" />
             </intent-filter>
+            <!-- Elimu staff invitations: open the single-use public invitation inside the installed app. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="revelacode.co.ke" android:path="/elimu-invitation" />
+            </intent-filter>
         </activity>
 
         <provider
