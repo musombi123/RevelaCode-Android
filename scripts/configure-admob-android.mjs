@@ -66,7 +66,7 @@ async function main() {
 
   if (missingKeys.length && !allowTestIds) {
     throw new Error(
-      `Production AdMob configuration is incomplete. Add these Android repository Actions secrets before building: ${missingKeys.join(", ")}. Production APKs must never silently fall back to Google's test ads.`,
+      `Production AdMob configuration is incomplete. Add these Android repository Actions variables before building: ${missingKeys.join(", ")}. Production APKs must never silently fall back to Google's test ads.`,
     );
   }
 
