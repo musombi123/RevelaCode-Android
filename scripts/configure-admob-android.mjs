@@ -2,7 +2,6 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const ROOT = process.cwd();
-const TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713";
 const APP_ID_KEY = "VITE_ADMOB_ANDROID_APP_ID";
 const UNIT_ID_KEYS = [
   "VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID",
@@ -59,14 +58,21 @@ async function main() {
       value: await readConfigValue(key),
     })),
   );
-  const hasConfiguredUnit = configuredUnits.some((item) => Boolean(item.value));
-  const useProductionIds = Boolean(configuredAppId && hasConfiguredUnit);
-  const appId = useProductionIds ? configuredAppId : TEST_APP_ID;
+  const allowTestIds = process.env.ADMOB_ALLOW_TEST_IDS === "true";
+  const missingKeys = [
+    ...(!configuredAppId ? [APP_ID_KEY] : []),
+    ...configuredUnits.filter((item) => !item.value).map((item) => item.key),
+  ];
 
-  if (
-    configuredAppId &&
-    !/^ca-app-pub-\d+~\d+$/.test(configuredAppId)
-  ) {
+  if (missingKeys.length && !allowTestIds) {
+    throw new Error(
+      `Production AdMob configuration is incomplete. Add these Android repository Actions secrets before building: ${missingKeys.join(", ")}. Production APKs must never silently fall back to Google's test ads.`,
+    );
+  }
+
+  const appId = configuredAppId || "ca-app-pub-3940256099942544~3347511713";
+
+  if (!/^ca-app-pub-\\d+~\\d+$/.test(appId)) {
     throw new Error(
       `${APP_ID_KEY} must be a valid AdMob application ID (format ca-app-pub-...~...).`,
     );
@@ -139,9 +145,9 @@ async function main() {
   await writeFile(stringsPath, stringsXml, "utf8");
 
   console.log(
-    useProductionIds
-      ? `AdMob Android manifest configured with your production App ID and ${configuredUnits.filter((item) => item.value).length} production native ad unit ID(s). Any unconfigured placement remains in test mode.`
-      : "AdMob Android manifest configured with Google's test application ID. Configure the production App ID and at least one native ad unit to enable production inventory.",
+    missingKeys.length
+      ? "AdMob Android manifest configured with Google's test application ID for the isolated native compile check only."
+      : `AdMob Android configured for production: real application ID and all ${configuredUnits.length} native ad-unit IDs are present. No Google sample ad IDs are used.`,
   );
 }
 
