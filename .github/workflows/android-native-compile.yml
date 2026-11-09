@@ -69,6 +69,9 @@ jobs:
           java-version: "21"
 
       - name: Build web assets and synchronize Capacitor
+        env:
+          # Native compile validation does not publish a distributable APK.
+          ADMOB_ALLOW_TEST_IDS: "true"
         run: |
           cd frontend
           npm ci
