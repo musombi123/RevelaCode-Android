@@ -46,7 +46,7 @@ on:
       version_code:
         description: "Android version code (must increase for each published release)"
         required: true
-        default: "5"
+        default: "6"
         type: string
 
 permissions:
