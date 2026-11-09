@@ -83,7 +83,7 @@ Configure these only in the Android repository's GitHub Actions secrets:
 | `ANDROID_KEY_ALIAS` | Release key alias |
 | `ANDROID_KEY_PASSWORD` | Release key password |
 
-Without both AdMob IDs, the native manifest uses Google's official test app ID; the production frontend ad unit ID is not injected. Without all signing secrets, the workflow produces a debug APK for testing only and does not pretend it is a signed release.
+The distributable Android build requires the production App ID and all three production native ad-unit IDs. If any are missing, the build stops with the exact missing secret names; it never silently packages Google's sample test IDs. The separate native compile-check workflow may use Google's official test App ID because it only compiles source and does not publish an APK. Without all signing secrets, the main workflow produces a debug APK for controlled testing only and does not pretend it is a signed release.
 
 Never commit `.env`, keystores, passwords, signing properties, or production credentials.
 
