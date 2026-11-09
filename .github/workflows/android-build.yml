@@ -259,6 +259,8 @@ jobs:
         run: npx cap sync android
 
       - name: Configure Android permissions, AdMob and release policy
+        env:
+          ADMOB_ALLOW_TEST_IDS: "false"
         run: |
           node scripts/configure-android-permissions.mjs
           node scripts/configure-admob-android.mjs
