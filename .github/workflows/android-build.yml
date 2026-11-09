@@ -281,7 +281,7 @@ jobs:
           cd android
           for attempt in 1 2 3; do
             echo "Gradle debug build attempt ${attempt}/3"
-            if ./gradlew --no-daemon --retry 3 assembleDebug; then
+            if ./gradlew --no-daemon assembleDebug; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then sleep 15; fi
@@ -378,7 +378,7 @@ jobs:
           cd android
           for attempt in 1 2 3; do
             echo "Gradle signed release build attempt ${attempt}/3"
-            if ./gradlew --no-daemon --retry 3 assembleRelease bundleRelease; then
+            if ./gradlew --no-daemon assembleRelease bundleRelease; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then sleep 15; fi
