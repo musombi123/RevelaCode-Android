@@ -175,7 +175,7 @@ jobs:
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
         run: |
-          for required_label in "Biashara Hub" "Run your business" "Sync Centre" "Sales entry" "Biashara mobile navigation"; do
+          for required_label in "Biashara Hub" "Sales. Stock. Finance. Sync. Automate." "Sync Centre" "Record a sale" "Business mobile navigation"; do
             if ! grep -R -F -q --include='*.js' "$required_label" dist/assets; then
               echo "Missing Biashara Android UI element: $required_label"
               exit 1
@@ -191,7 +191,7 @@ jobs:
             exit 1
           fi
           echo "MissionPulse responsive workspace is present in the Android web bundle."
-          if ! grep -R -q --include='*.js' 'rc-android-home' dist/assets; then
+          if ! grep -R -q --include='*.js' 'rc-home-dashboard-content' dist/assets; then
             echo "Compact Android home layout was not found in the production bundle."
             exit 1
           fi
@@ -214,6 +214,11 @@ jobs:
             "Crop specifications" \
             "Farm specifications & registration" \
             "Farmer verification" \
+            "Crops, soil and evidence" \
+            "Crop / farm evidence" \
+            "crop_evidence_file_id" \
+            "/shamba/farmer/evidence" \
+            "View file" \
             "Shamba Trust Centre"; do
             if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
               echo "Missing Shamba Android verification/specification control: $required_marker"
