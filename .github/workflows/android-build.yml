@@ -175,7 +175,7 @@ jobs:
       - name: Verify Biashara Android overview and navigation are included
         working-directory: frontend
         run: |
-          for required_label in "Biashara Hub" "Run your business" "Sync Centre" "Sales entry" "Biashara mobile navigation"; do
+          for required_label in "Biashara Hub" "Sales. Stock. Finance. Sync. Automate." "Sync Centre" "Record a sale" "Business mobile navigation"; do
             if ! grep -R -F -q --include='*.js' "$required_label" dist/assets; then
               echo "Missing Biashara Android UI element: $required_label"
               exit 1
