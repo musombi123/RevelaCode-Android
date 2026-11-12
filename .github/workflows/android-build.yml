@@ -214,6 +214,11 @@ jobs:
             "Crop specifications" \
             "Farm specifications & registration" \
             "Farmer verification" \
+            "Crops, soil and evidence" \
+            "Crop / farm evidence" \
+            "crop_evidence_file_id" \
+            "/shamba/farmer/evidence" \
+            "View file" \
             "Shamba Trust Centre"; do
             if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
               echo "Missing Shamba Android verification/specification control: $required_marker"
