@@ -191,7 +191,7 @@ jobs:
             exit 1
           fi
           echo "MissionPulse responsive workspace is present in the Android web bundle."
-          if ! grep -R -q --include='*.js' 'rc-android-home' dist/assets; then
+          if ! grep -R -q --include='*.js' 'rc-home-dashboard-content' dist/assets; then
             echo "Compact Android home layout was not found in the production bundle."
             exit 1
           fi
