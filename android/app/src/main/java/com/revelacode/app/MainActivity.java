@@ -20,6 +20,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(RevelaPermissionsPlugin.class);
+        registerPlugin(RevelaDownloadPlugin.class);
         super.onCreate(savedInstanceState);
         applyImmersiveAppNavigation();
         attachSecureDesignDownloads();
