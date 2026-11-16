@@ -82,7 +82,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # For push-triggered builds, package the latest verified frontend main.
+      # For push-triggered builds, package the latest verified frontend main.\n      # Pull-request builds pin the current 2.2.3 frontend feature branch.
       # Repository-dispatch and manual runs can still pin an exact frontend ref.
       - name: Checkout the selected web application revision
         uses: actions/checkout@v4
