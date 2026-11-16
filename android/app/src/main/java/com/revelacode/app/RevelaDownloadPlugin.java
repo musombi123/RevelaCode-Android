@@ -1,5 +1,6 @@
 package com.revelacode.app;
 
+import android.app.DownloadManager;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Build;
@@ -20,6 +21,57 @@ import java.util.Locale;
 
 @CapacitorPlugin(name = "RevelaDownload")
 public class RevelaDownloadPlugin extends Plugin {
+
+    @PluginMethod
+    public void downloadUrl(PluginCall call) {
+        String source = call.getString("url", "");
+        String requestedName = call.getString("fileName", "revelacode-download");
+        String mimeType = call.getString("mimeType", "application/octet-stream");
+        Uri uri;
+        try {
+            uri = Uri.parse(source);
+        } catch (Exception error) {
+            call.reject("The download URL is invalid.");
+            return;
+        }
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) {
+            call.reject("Only secure HTTPS downloads are supported on Android.");
+            return;
+        }
+
+        try {
+            String fileName = sanitizeFileName(requestedName);
+            DownloadManager manager = (DownloadManager) getContext().getSystemService(android.content.Context.DOWNLOAD_SERVICE);
+            if (manager == null) throw new IllegalStateException("Android download service is unavailable.");
+
+            DownloadManager.Request request = new DownloadManager.Request(uri);
+            request.setTitle(fileName);
+            request.setDescription("RevelaCode file download");
+            request.setMimeType(mimeType);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setAllowedOverMetered(true);
+            request.setAllowedOverRoaming(false);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS + "/RevelaCode", fileName);
+            } else {
+                File root = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                if (root == null) throw new IllegalStateException("App downloads storage is unavailable.");
+                File directory = new File(root, "RevelaCode");
+                if (!directory.exists() && !directory.mkdirs()) throw new IllegalStateException("Could not create the download folder.");
+                request.setDestinationInExternalFilesDir(getContext(), Environment.DIRECTORY_DOWNLOADS + "/RevelaCode", fileName);
+            }
+
+            long downloadId = manager.enqueue(request);
+            JSObject result = new JSObject();
+            result.put("downloadId", downloadId);
+            result.put("fileName", fileName);
+            call.resolve(result);
+        } catch (Exception error) {
+            call.reject("Unable to start the download: " + error.getMessage(), error);
+        }
+    }
+
     @PluginMethod
     public void saveFile(PluginCall call) {
         String fileName = call.getString("fileName", "revelacode-download.pdf");
