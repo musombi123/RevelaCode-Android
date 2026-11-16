@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.getcapacitor.BridgeActivity;
 
+import java.net.URLConnection;
 import java.util.Locale;
 
 public class MainActivity extends BridgeActivity {
@@ -60,9 +61,9 @@ public class MainActivity extends BridgeActivity {
     }
 
     /**
-     * Handle the standard HTML download attribute inside the Android WebView.
-     * Generated files are public media URLs; no admin credential or browser
-     * storage token is required to fetch them.
+     * Route HTML download actions through Android DownloadManager so files
+     * are saved to the user's public Downloads collection, not trapped in the
+     * WebView or an app-private folder.
      */
     private void attachSecureDesignDownloads() {
         if (getBridge() == null || getBridge().getWebView() == null) {
@@ -74,12 +75,37 @@ public class MainActivity extends BridgeActivity {
             Uri uri = Uri.parse(url);
             String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
             String path = uri.getPath() == null ? "" : uri.getPath().toLowerCase(Locale.ROOT);
+
             boolean trustedHost = host.equals("revelaai.onrender.com")
+                    || host.equals("revelacode-backend.onrender.com")
                     || host.equals("revelacode.co.ke")
-                    || host.equals("www.revelacode.co.ke");
-            boolean supportedFile = path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".pdf");
-            if (!"https".equalsIgnoreCase(uri.getScheme()) || !trustedHost || !supportedFile) {
-                Toast.makeText(this, "Only secure RevelaAI design downloads are allowed.", Toast.LENGTH_SHORT).show();
+                    || host.endsWith(".revelacode.co.ke")
+                    || host.equals("res.cloudinary.com")
+                    || host.endsWith(".cloudinary.com")
+                    || host.equals("storage.googleapis.com");
+            String guessedName = URLUtil.guessFileName(url, contentDisposition, mimeType);
+            String resolvedMime = mimeType == null || mimeType.isEmpty()
+                    ? URLConnection.guessContentTypeFromName(guessedName)
+                    : mimeType;
+            boolean supportedExtension = path.matches("(?i).*\\.(pdf|png|jpe?g|webp|gif|mp4|mov|m4v|webm|mp3|wav|ogg|csv|txt|json|xml|zip|xlsx|xls|docx|doc|pptx|ppt)$");
+            boolean supportedMime = resolvedMime != null && (
+                    resolvedMime.startsWith("image/")
+                    || resolvedMime.startsWith("video/")
+                    || resolvedMime.startsWith("audio/")
+                    || resolvedMime.equals("application/pdf")
+                    || resolvedMime.equals("text/plain")
+                    || resolvedMime.equals("text/csv")
+                    || resolvedMime.equals("application/csv")
+                    || resolvedMime.equals("application/json")
+                    || resolvedMime.equals("application/zip")
+                    || resolvedMime.contains("spreadsheet")
+                    || resolvedMime.contains("excel")
+                    || resolvedMime.contains("word")
+                    || resolvedMime.contains("presentation")
+            );
+
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || !trustedHost || (!supportedExtension && !supportedMime)) {
+                Toast.makeText(this, "This file source or format is not allowed.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -89,20 +115,29 @@ public class MainActivity extends BridgeActivity {
                 return;
             }
 
-            String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
-            fileName = fileName.replaceAll("[^A-Za-z0-9._-]", "_");
+            String fileName = guessedName == null || guessedName.trim().isEmpty()
+                    ? "revelacode-download"
+                    : guessedName.replaceAll("[^A-Za-z0-9._-]", "_");
+            int extensionIndex = fileName.lastIndexOf('.');
+            String baseName = extensionIndex > 0 ? fileName.substring(0, extensionIndex) : fileName;
+            String extension = extensionIndex > 0 ? fileName.substring(extensionIndex) : "";
+            fileName = baseName + "-" + System.currentTimeMillis() + extension;
+
             DownloadManager.Request download = new DownloadManager.Request(uri);
-            download.setTitle(fileName);
-            download.setDescription("RevelaAI generated design");
-            if (mimeType != null && !mimeType.isEmpty()) {
-                download.setMimeType(mimeType);
+            download.setTitle(guessedName == null ? "RevelaCode download" : guessedName);
+            download.setDescription("Downloading a file from RevelaCode");
+            if (resolvedMime != null && !resolvedMime.isEmpty()) {
+                download.setMimeType(resolvedMime);
+            }
+            if (userAgent != null && !userAgent.isEmpty()) {
+                download.addRequestHeader("User-Agent", userAgent);
             }
             download.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             download.setAllowedOverMetered(true);
             download.setAllowedOverRoaming(false);
-            download.setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, fileName);
+            download.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
             manager.enqueue(download);
-            Toast.makeText(this, "Design download started.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Download started. Check your Downloads folder.", Toast.LENGTH_SHORT).show();
         });
     }
 }
