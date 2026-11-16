@@ -17,7 +17,6 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Locale;
 
 @CapacitorPlugin(name = "RevelaDownload")
 public class RevelaDownloadPlugin extends Plugin {
@@ -59,7 +58,7 @@ public class RevelaDownloadPlugin extends Plugin {
                 if (root == null) throw new IllegalStateException("App downloads storage is unavailable.");
                 File directory = new File(root, "RevelaCode");
                 if (!directory.exists() && !directory.mkdirs()) throw new IllegalStateException("Could not create the download folder.");
-                request.setDestinationInExternalFilesDir(getContext(), Environment.DIRECTORY_DOWNLOADS + "/RevelaCode", fileName);
+                request.setDestinationInExternalFilesDir(getContext(), Environment.DIRECTORY_DOWNLOADS, "RevelaCode/" + fileName);
             }
 
             long downloadId = manager.enqueue(request);
