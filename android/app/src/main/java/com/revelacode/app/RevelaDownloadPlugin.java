@@ -33,8 +33,13 @@ public class RevelaDownloadPlugin extends Plugin {
             call.reject("The download URL is invalid.");
             return;
         }
-        if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) {
-            call.reject("Only secure HTTPS downloads are supported on Android.");
+        String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(java.util.Locale.ROOT);
+        boolean trustedHost = host.equals("revelaai.onrender.com")
+                || host.equals("revelacode-backend.onrender.com")
+                || host.equals("revelacode.co.ke")
+                || host.equals("www.revelacode.co.ke");
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || !trustedHost) {
+            call.reject("Only HTTPS downloads from trusted RevelaCode services are supported.");
             return;
         }
 
