@@ -22,6 +22,10 @@ const requiredFeatures = [
   '<uses-feature android:name="android.hardware.camera" android:required="false" />',
   '<uses-feature android:name="android.hardware.microphone" android:required="false" />',
 ];
+const speechServiceQueries = [
+  '<intent><action android:name="android.speech.RecognitionService" /></intent>',
+  '<intent><action android:name="android.intent.action.TTS_SERVICE" /></intent>',
+];
 const missingPermissions = requiredPermissions
   .filter((permission) => !manifest.includes('android:name="' + permission + '"'))
   .map((permission) => '  <uses-permission android:name="' + permission + '" />');
@@ -38,6 +42,32 @@ if (manifestAdditions.length) {
   manifest = manifest.replace(/(\s*)<application\b/, "\n" + manifestAdditions.join("\n") + "\n$1<application");
   await writeFile(manifestPath, manifest, "utf8");
 }
+
+// Android 11+ filters package/service discovery unless the interaction is
+// declared explicitly. Both the speech recognizer and TTS engine must remain
+// visible to native Capacitor plugins on Android 11 and newer.
+const existingQueries = manifest.match(/<queries\b[^>]*>[\s\S]*?<\/queries>/);
+if (existingQueries) {
+  let queryXml = existingQueries[0];
+  for (const query of speechServiceQueries) {
+    const action = query.match(/android:name="([^"]+)"/)?.[1];
+    if (action && !queryXml.includes('android:name="' + action + '"')) {
+      queryXml = queryXml.replace(/<\/queries>/, "        " + query + "\n    </queries>");
+    }
+  }
+  manifest = manifest.replace(existingQueries[0], queryXml);
+} else {
+  const queryBlock = [
+    "    <queries>",
+    ...speechServiceQueries.map((query) => "        " + query),
+    "    </queries>",
+  ].join("\n");
+  if (!/<application\b/.test(manifest)) {
+    throw new Error("Could not locate the application element while configuring speech service visibility.");
+  }
+  manifest = manifest.replace(/(\s*)<application\b/, "\n" + queryBlock + "\n$1<application");
+}
+await writeFile(manifestPath, manifest, "utf8");
 
 const pluginSource = [
   'package com.revelacode.app;',

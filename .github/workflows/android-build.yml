@@ -273,6 +273,8 @@ jobs:
           ADMOB_ALLOW_TEST_IDS: "false"
         run: |
           node scripts/configure-android-permissions.mjs
+          grep -F '<action android:name="android.speech.RecognitionService" />' android/app/src/main/AndroidManifest.xml
+          grep -F '<action android:name="android.intent.action.TTS_SERVICE" />' android/app/src/main/AndroidManifest.xml
           node scripts/configure-admob-android.mjs
           node scripts/set-android-release-version.mjs
           node scripts/verify-android-release-identity.mjs

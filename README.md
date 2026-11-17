@@ -23,6 +23,18 @@ Existing RevelaCode services
   RevelaCode Backend / RevelaAI / Jumuiya services
 ```
 
+## Native voice conversations
+
+The RevelaAI voice workspace uses the same authenticated AI gateway as text chat, with native device speech I/O in the Android app:
+
+- `@capgo/capacitor-speech-recognition` provides Android `SpeechRecognizer` input and inline segmented results. The app requests microphone permission at runtime.
+- `@capgo/capacitor-speech-synthesis` reads assistant responses through Android Text-to-Speech, rather than relying on Web Speech Synthesis (which Android WebView disables).
+- The voice session stops recognition while RevelaAI is responding, waits for speech playback to finish, and then resumes recognition for the next turn.
+- English (Kenya), Kiswahili (Kenya), and English (US) recognition locales are exposed in the voice workspace. On-device recognition is used only when the system reports that the selected locale is supported; the standard device speech provider is the fallback.
+- Android's existing `RECORD_AUDIO` and `MODIFY_AUDIO_SETTINGS` permissions are retained and are also enforced by `scripts/configure-android-permissions.mjs`.
+
+Android recognition availability and offline support depend on the speech service and language models installed on the device. Text-to-speech availability depends on an installed Android TTS engine and voice data. The browser build keeps its Web Speech API fallback; it does not pretend the native recognition plugin works on the web.
+
 ## Stable application identity
 
 - Android application ID: `com.revelacode.app`
