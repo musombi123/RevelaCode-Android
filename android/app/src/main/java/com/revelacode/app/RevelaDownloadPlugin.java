@@ -57,7 +57,7 @@ public class RevelaDownloadPlugin extends Plugin {
             request.setAllowedOverRoaming(false);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS + "/RevelaCode", fileName);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "RevelaCode/" + fileName);
             } else {
                 File root = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
                 if (root == null) throw new IllegalStateException("App downloads storage is unavailable.");
