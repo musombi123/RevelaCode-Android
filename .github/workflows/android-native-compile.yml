@@ -84,6 +84,8 @@ jobs:
           npm install --no-audit --no-fund
           npx cap sync android
           node scripts/configure-android-permissions.mjs
+          grep -F '<action android:name="android.speech.RecognitionService" />' android/app/src/main/AndroidManifest.xml
+          grep -F '<action android:name="android.intent.action.TTS_SERVICE" />' android/app/src/main/AndroidManifest.xml
           node scripts/configure-admob-android.mjs
           chmod +x android/gradlew
           grep -F 'android:scheme="@string/custom_url_scheme"' android/app/src/main/AndroidManifest.xml

@@ -2,8 +2,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const appVersion = String(process.env.ANDROID_VERSION_NAME || "2.2.2").trim();
-const rawCode = String(process.env.ANDROID_VERSION_CODE || "6").trim();
+const appVersion = String(process.env.ANDROID_VERSION_NAME || "2.2.3").trim();
+const rawCode = String(process.env.ANDROID_VERSION_CODE || "7").trim();
 
 if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(appVersion)) {
   throw new Error("ANDROID_VERSION_NAME must be a semantic version such as 2.2.2.");
@@ -27,4 +27,18 @@ if (!/\bversionCode\s+\d+/.test(source) || !/\bversionName\s+["'][^"']+["']/.tes
 source = source.replace(/\bversionCode\s+\d+/, "versionCode " + Number(rawCode));
 source = source.replace(/\bversionName\s+["'][^"']+["']/, 'versionName "' + appVersion + '"');
 await writeFile(gradlePath, source, "utf8");
+
+const packagePath = resolve("package.json");
+const lockPath = resolve("package-lock.json");
+const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
+packageJson.version = appVersion;
+await writeFile(packagePath, JSON.stringify(packageJson, null, 2) + "\n", "utf8");
+
+const packageLock = JSON.parse(await readFile(lockPath, "utf8"));
+packageLock.version = appVersion;
+if (packageLock.packages && packageLock.packages[""]) {
+  packageLock.packages[""].version = appVersion;
+}
+await writeFile(lockPath, JSON.stringify(packageLock, null, 2) + "\n", "utf8");
+
 console.log("Prepared Android version " + appVersion + " (versionCode " + Number(rawCode) + ").");

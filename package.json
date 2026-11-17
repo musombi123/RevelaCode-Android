@@ -1,6 +1,6 @@
 {
   "name": "revelacode-android",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "private": true,
   "type": "module",
   "description": "Native Android application packaging for the RevelaCode ecosystem",
@@ -19,7 +19,9 @@
     "@capacitor/app": "8.1.2",
     "@capacitor/browser": "8.0.5",
     "@capacitor/core": "8.5.0",
-    "@capacitor/splash-screen": "8.0.2"
+    "@capacitor/splash-screen": "8.0.2",
+    "@capgo/capacitor-speech-recognition": "8.5.1",
+    "@capgo/capacitor-speech-synthesis": "8.0.27"
   },
   "devDependencies": {
     "@capacitor/assets": "3.0.5",
