@@ -82,13 +82,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      # For push-triggered builds, package the latest verified frontend main.
+      # For push-triggered builds, package the latest verified frontend main.\n      # Pull-request builds pin the current 2.2.3 frontend feature branch.
+      # The native DownloadManager and MediaStore bridge are included in this build.
       # Repository-dispatch and manual runs can still pin an exact frontend ref.
       - name: Checkout the selected web application revision
         uses: actions/checkout@v4
         with:
           repository: musombi123/RevelaCode-Frontend
-          ref: ${{ github.event.client_payload.frontend_ref || inputs.frontend_ref || (github.event_name == 'pull_request' && github.event.pull_request.head.ref) || 'main' }}
+          ref: ${{ github.event.client_payload.frontend_ref || inputs.frontend_ref || (github.event_name == 'pull_request' && 'fix/revelacode-2.2.3-downloads-home-nav' || 'main') }}
           path: frontend
 
       - name: Set up Node.js
@@ -182,6 +183,17 @@ jobs:
             fi
           done
           echo "Biashara Android overview modules and mobile navigation are present."
+
+      - name: Verify Community and RevelaAI downloads plus global Home navigation
+        working-directory: frontend
+        run: |
+          for required_marker in "Download attachment" "Download original" "Return to RevelaCode Home"; do
+            if ! grep -R -F -q --include='*.js' "$required_marker" dist/assets; then
+              echo "Missing 2.2.3 download/navigation marker: $required_marker"
+              exit 1
+            fi
+          done
+          echo "Community and RevelaAI download actions and global Home navigation are bundled."
 
       - name: Verify MissionPulse responsive workspace is included
         working-directory: frontend
