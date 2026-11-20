@@ -90,6 +90,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: musombi123/RevelaCode-Frontend
+          token: ${{ secrets.FRONTEND_REPO_READ_TOKEN || github.token }}
           ref: ${{ github.event.client_payload.frontend_ref || inputs.frontend_ref || (github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'nexora-basic-rewarded-tools' && 'nexora-basic-rewarded-tools' || (github.event_name == 'pull_request' && 'fix/revelacode-2.2.3-downloads-home-nav' || 'main')) }}
           path: frontend
 
