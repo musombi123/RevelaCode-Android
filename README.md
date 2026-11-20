@@ -70,6 +70,19 @@ Each run:
 
 The web bundle under `www/` and Capacitor-generated web assets under `android/app/src/main/assets/public/` are build outputs and are intentionally not committed. Native source, Gradle files, manifest changes, app resources, and native extensions are committed.
 
+## Cross-repository checkout permissions
+
+The Android build checks out source from the separate `musombi123/RevelaCode-Frontend` repository. Since that repository is private, the Android repository's default `GITHUB_TOKEN` cannot read it.
+
+Add a fine-grained personal access token as a **repository secret in RevelaCode-Android**:
+
+- Secret name: `FRONTEND_REPO_READ_TOKEN`
+- Resource owner: `musombi123`
+- Repository access: only `musombi123/RevelaCode-Frontend`
+- Repository permission: **Contents: Read-only**
+
+The Android workflow uses this token only for the frontend checkout. Do not reuse the Android dispatch token unless it has explicit read access to the frontend repository. Do not put the token in repository variables or source files.
+
 ## Triggering Android builds from the frontend repository
 
 Add a fine-grained GitHub token as the **frontend repository secret**:
@@ -90,6 +103,7 @@ Configure the AdMob IDs below as **repository variables** in the Android reposit
 | Repository variable `VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID` | Community Feed native ad unit ID |
 | Repository variable `VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID` | Community Home native ad unit ID |
 | Repository variable `VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID` | Faith Overview native ad unit ID |
+| Repository variable `VITE_ADMOB_NEXORA_REWARDED_AD_UNIT_ID` | NEXORA Basic Creator Flow Rewarded ad unit ID (optional until created) |
 | Repository secret `ANDROID_KEYSTORE_BASE64` | Base64-encoded release keystore |
 | Repository secret `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
 | Repository secret `ANDROID_KEY_ALIAS` | Release key alias |
