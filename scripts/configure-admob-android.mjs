@@ -8,6 +8,9 @@ const UNIT_ID_KEYS = [
   "VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID",
   "VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID",
 ];
+const OPTIONAL_UNIT_ID_KEYS = [
+  "VITE_ADMOB_NEXORA_REWARDED_AD_UNIT_ID",
+];
 
 function parseDotEnv(text, key) {
   for (const line of text.split(/\r?\n/)) {
@@ -58,6 +61,12 @@ async function main() {
       value: await readConfigValue(key),
     })),
   );
+  const optionalUnits = await Promise.all(
+    OPTIONAL_UNIT_ID_KEYS.map(async (key) => ({
+      key,
+      value: await readConfigValue(key),
+    })),
+  );
   const allowTestIds = process.env.ADMOB_ALLOW_TEST_IDS === "true";
   const missingKeys = [
     ...(!configuredAppId ? [APP_ID_KEY] : []),
@@ -78,7 +87,7 @@ async function main() {
     );
   }
 
-  for (const item of configuredUnits) {
+  for (const item of [...configuredUnits, ...optionalUnits]) {
     if (item.value && !/^ca-app-pub-\d+\/\d+$/.test(item.value)) {
       throw new Error(
         `${item.key} must be a valid AdMob ad unit ID (format ca-app-pub-.../...).`,
@@ -147,8 +156,11 @@ async function main() {
   console.log(
     missingKeys.length
       ? "AdMob Android manifest configured with Google's test application ID for the isolated native compile check only."
-      : `AdMob Android configured for production: real application ID and all ${configuredUnits.length} native ad-unit IDs are present. No Google sample ad IDs are used.`,
+      : `AdMob Android configured for production: real application ID and all ${configuredUnits.length} required native ad-unit IDs are present. No Google sample ad IDs are used.`,
   );
+  if (optionalUnits.some((item) => item.value)) {
+    console.log("NEXORA rewarded tool-credit AdMob unit ID validated for this Android build.");
+  }
 }
 
 main().catch((error) => {
