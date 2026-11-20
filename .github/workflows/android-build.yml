@@ -76,6 +76,7 @@ jobs:
       VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID: ${{ vars.VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID }}
       VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID: ${{ vars.VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID }}
       VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID: ${{ vars.VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID }}
+      VITE_ADMOB_NEXORA_REWARDED_AD_UNIT_ID: ${{ vars.VITE_ADMOB_NEXORA_REWARDED_AD_UNIT_ID }}
     steps:
       - name: Checkout Android source
         uses: actions/checkout@v4
@@ -111,6 +112,11 @@ jobs:
           VITE_API_BASE_URL: "https://revelacode-backend.onrender.com"
           VITE_BACKEND_URL: "https://revelacode-backend.onrender.com"
           VITE_REVELAAI_API_URL: "https://revelaai.onrender.com"
+          VITE_ADMOB_ANDROID_APP_ID: ${{ vars.VITE_ADMOB_ANDROID_APP_ID }}
+          VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID: ${{ vars.VITE_ADMOB_COMMUNITY_NATIVE_AD_UNIT_ID }}
+          VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID: ${{ vars.VITE_ADMOB_COMMUNITY_OVERVIEW_NATIVE_AD_UNIT_ID }}
+          VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID: ${{ vars.VITE_ADMOB_FAITH_NATIVE_AD_UNIT_ID }}
+          VITE_ADMOB_NEXORA_REWARDED_AD_UNIT_ID: ${{ vars.VITE_ADMOB_NEXORA_REWARDED_AD_UNIT_ID }}
           # Use Ubuntu's maintained libvips package instead of relying on
           # GitHub release-asset downloads for sharp's bundled libvips binary.
           SHARP_FORCE_GLOBAL_LIBVIPS: "1"
@@ -118,8 +124,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libvips-dev
           npm ci
-          npm run build
+          npm run build:web
           test -s dist/index.html
+          test -s public/dev_nexora/index.html
 
       - name: Verify Shamba footer and Android hardware Back support
         working-directory: frontend
@@ -258,9 +265,11 @@ jobs:
       - name: Stage the production web bundle and brand asset
         run: |
           rm -rf www brand-assets
-          mkdir -p www brand-assets
+          mkdir -p www/dev_nexora brand-assets
           cp -a frontend/dist/. www/
+          cp -a frontend/public/dev_nexora/. www/dev_nexora/
           test -s www/index.html
+          test -s www/dev_nexora/index.html
           test -s frontend/public/Logo.png
           cp frontend/public/Logo.png brand-assets/logo.png
 
