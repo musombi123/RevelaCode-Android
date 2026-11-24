@@ -189,3 +189,12 @@ Render must have `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_WEB_CLIENT_SECRET`,
 ## Licence
 
 Proprietary — All Rights Reserved for original RevelaCode Android application source and materials. Third-party dependencies retain their own licences. See [LICENSE](LICENSE).
+
+## Repository governance
+
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributing](CONTRIBUTING.md)
+
+## Licence
+
+Original RevelaCode Android native source and materials are proprietary and all rights reserved; see [LICENSE](LICENSE). Capacitor, Gradle, SDKs, plugins, and other third-party components retain their own licences.
