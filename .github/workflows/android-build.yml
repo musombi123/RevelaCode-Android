@@ -83,7 +83,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # For push-triggered builds, package the latest verified frontend main.\n      # Pull-request builds pin the current 2.2.3 frontend feature branch.
+      # Release publication is intentionally gated by the explicit [publish-android-release] push marker.\n      # Push-triggered release builds package the current frontend main; manual runs can pin an exact ref.\n      # Pull-request builds pin the current 2.2.3 frontend feature branch.
       # The native DownloadManager and MediaStore bridge are included in this build.
       # Repository-dispatch and manual runs can still pin an exact frontend ref.
       - name: Checkout the selected web application revision
