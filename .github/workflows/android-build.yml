@@ -1,4 +1,5 @@
 name: Android build and launch verification
+# Next signed production release after v2.2.2: version 2.2.3 / versionCode 7.
 
 on:
   push:
