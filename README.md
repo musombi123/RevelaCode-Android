@@ -184,3 +184,8 @@ certificate SHA-256 fingerprint to the website's `assetlinks.json` too.
 Render must have `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_WEB_CLIENT_SECRET`,
 `GOOGLE_OAUTH_REDIRECT_URI`, and
 `GOOGLE_ANDROID_RETURN_URI=com.revelacode.app://oauth/callback` set.
+
+
+## Licence
+
+Proprietary — All Rights Reserved for original RevelaCode Android application source and materials. Third-party dependencies retain their own licences. See [LICENSE](LICENSE).
